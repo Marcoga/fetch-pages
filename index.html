@@ -189,13 +189,48 @@
 </div>
 
 <script>
-  function saveNotes() {
-    localStorage.setItem('summer-recomp-notes', document.getElementById('notes').value);
+  const API_URL = 'http://192.168.86.20:3300/api/logs';
+
+  async function saveNotes() {
+    const content = document.getElementById('notes').value;
+    localStorage.setItem('summer-recomp-notes', content);
     const btn = document.querySelector('.save-btn');
-    btn.textContent = '✓ Progress Saved';
+    
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content })
+      });
+      if (res.ok) {
+        btn.textContent = '✓ Progress Synced to DB';
+      } else {
+        btn.textContent = '✓ Saved Locally (Sync Error)';
+      }
+    } catch (e) {
+      console.error('Sync failed', e);
+      btn.textContent = '✓ Saved Locally (Offline)';
+    }
+    
     setTimeout(() => btn.textContent = 'Save Progress Log', 2000);
   }
-  document.getElementById('notes').value = localStorage.getItem('summer-recomp-notes') || '';
+
+  async function loadNotes() {
+    document.getElementById('notes').value = localStorage.getItem('summer-recomp-notes') || '';
+    try {
+      const res = await fetch(API_URL);
+      if (res.ok) {
+        const logs = await res.json();
+        if (logs.length > 0) {
+          document.getElementById('notes').value = logs[0].content;
+        }
+      }
+    } catch (e) {
+      console.error('Initial load from DB failed', e);
+    }
+  }
+
+  loadNotes();
 </script>
 
 </body>
