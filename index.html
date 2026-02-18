@@ -48,6 +48,11 @@
   nav a { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 600; }
   nav a:hover { color: var(--text); }
   nav a.active { color: var(--accent2); }
+
+  details summary { cursor: pointer; color: var(--accent2); font-weight: 600; margin-bottom: 0.5rem; outline: none; list-style: none; display: flex; align-items: center; gap: 0.5rem; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary:before { content: "▶"; font-size: 0.8rem; transition: transform 0.2s; }
+  details[open] summary:before { transform: rotate(90deg); }
 </style>
 </head>
 <body>
@@ -150,10 +155,13 @@
 
     <h3>🧗 Bouldering Warm-up</h3>
     <div class="card">
-      <p>Essential pre-climb routine:</p>
-      <div class="video-container">
-        <iframe src="https://www.youtube.com/embed/UmwGVqAT5y8" allowfullscreen loading="lazy"></iframe>
-      </div>
+      <details>
+        <summary>Show Warm-up Videos</summary>
+        <p>Essential pre-climb routine:</p>
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/UmwGVqAT5y8" allowfullscreen loading="lazy"></iframe>
+        </div>
+      </details>
     </div>
   </div>
 </div>
