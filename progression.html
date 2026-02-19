@@ -116,6 +116,63 @@
   </div>
 </div>
 
+<style>
+  .hold-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+  .hold-card { background: #111; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .hold-img { width: 100%; height: 180px; object-fit: cover; border-bottom: 1px solid var(--border); }
+  .hold-info { padding: 1rem; }
+  .hold-name { color: var(--accent); font-weight: 700; font-size: 1.1rem; margin-bottom: 0.25rem; display: block; }
+  .hold-desc { font-size: 0.85rem; color: var(--muted); }
+</style>
+
+<div class="timeline" style="margin-bottom: 3rem;">
+  <h2>🤜 The Hold Lexicon</h2>
+  <div class="hold-grid">
+    <div class="hold-card">
+      <img src="assets/holds/jug.jpg" class="hold-img" alt="Jug">
+      <div class="hold-info">
+        <span class="hold-name">Jugs</span>
+        <p class="hold-desc">Large, deep, and easy to grab with the whole hand. "Thank God" holds.</p>
+      </div>
+    </div>
+    <div class="hold-card">
+      <img src="assets/holds/crimp.jpg" class="hold-img" alt="Crimp">
+      <div class="hold-info">
+        <span class="hold-name">Crimps</span>
+        <p class="hold-desc">Small edges that only fit finger pads. Requires significant finger strength.</p>
+      </div>
+    </div>
+    <div class="hold-card">
+      <img src="assets/holds/sloper.jpg" class="hold-img" alt="Sloper">
+      <div class="hold-info">
+        <span class="hold-name">Slopers</span>
+        <p class="hold-desc">Rounded holds with no positive edge. Relies on friction and body tension.</p>
+      </div>
+    </div>
+    <div class="hold-card">
+      <img src="assets/holds/pinch.jpg" class="hold-img" alt="Pinch">
+      <div class="hold-info">
+        <span class="hold-name">Pinches</span>
+        <p class="hold-desc">Any hold where you use your thumb on the opposite side to create compression.</p>
+      </div>
+    </div>
+    <div class="hold-card">
+      <img src="assets/holds/pocket.jpg" class="hold-img" alt="Pocket">
+      <div class="hold-info">
+        <span class="hold-name">Pockets</span>
+        <p class="hold-desc">Holes in the wall that fit 1, 2, or 3 fingers. High stress on tendons.</p>
+      </div>
+    </div>
+    <div class="hold-card">
+      <img src="assets/holds/volume.jpg" class="hold-img" alt="Volume">
+      <div class="hold-info">
+        <span class="hold-name">Volumes</span>
+        <p class="hold-desc">Large geometric additions to the wall. Used for smearing and body positioning.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <p style="text-align: center; color: var(--muted); margin-top: 2rem;">⚡ <em>"Don't climb harder, climb better."</em> — Fetch</p>
 
 </body>
