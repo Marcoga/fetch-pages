@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giselle — Biomechanical Analysis v2 (Opus)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root {
+      --bg-primary: #06060b;
+      --bg-secondary: #0e0e16;
+      --bg-card: #14141f;
+      --bg-card-hover: #1c1c2a;
+      --bg-card-alt: #18182488;
+      --accent: #8b5cf6;
+      --accent-soft: #7c3aed;
+      --accent-glow: rgba(139, 92, 246, 0.12);
+      --accent-green: #10b981;
+      --accent-green-glow: rgba(16, 185, 129, 0.12);
+      --accent-amber: #f59e0b;
+      --accent-amber-glow: rgba(245, 158, 11, 0.12);
+      --accent-rose: #f43f5e;
+      --accent-rose-glow: rgba(244, 63, 94, 0.12);
+      --accent-blue: #3b82f6;
+      --accent-blue-glow: rgba(59, 130, 246, 0.12);
+      --accent-cyan: #06b6d4;
+      --text-primary: #e4e4e7;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --border: #1f1f2e;
+      --border-accent: rgba(139, 92, 246, 0.25);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Hero ─── */
+    .hero {
+      position: relative;
+      padding: 5rem 2rem 4rem;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(139,92,246,0.06) 0%, transparent 60%);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -100px; left: 50%;
+      transform: translateX(-50%);
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(139,92,246,0.10) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      background: var(--accent-glow);
+      border: 1px solid var(--border-accent);
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #fff 20%, var(--accent) 80%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 660px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+    .hero-meta {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    .hero-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .hero-meta-item span {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* ─── Container ─── */
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ─── Section ─── */
+    .section-header {
+      padding: 4rem 0 2rem;
+    }
+    .section-header h2 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--text-primary) 40%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .section-header p {
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    /* ─── Timeline Frame Cards ─── */
+    .timeline {
+      position: relative;
+      padding-left: 2.5rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0.75rem;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--accent), var(--accent-green), var(--accent-amber), var(--accent-rose));
+      border-radius: 2px;
+    }
+
+    .frame-card {
+      position: relative;
+      margin-bottom: 3rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .frame-card:hover {
+      border-color: var(--border-accent);
+      box-shadow: 0 0 40px rgba(139,92,246,0.06);
+    }
+    .frame-card::before {
+      content: '';
+      position: absolute;
+      left: -2.5rem;
+      top: 2.2rem;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 3px solid var(--bg-primary);
+      z-index: 1;
+    }
+
+    .frame-card-inner {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 0;
+    }
+    @media (max-width: 768px) {
+      .frame-card-inner {
+        grid-template-columns: 1fr;
+      }
+      .timeline { padding-left: 0; }
+      .timeline::before { display: none; }
+      .frame-card::before { display: none; }
+    }
+
+    .frame-img-wrap {
+      position: relative;
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .frame-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      min-height: 320px;
+      transition: transform 0.5s;
+    }
+    .frame-card:hover .frame-img-wrap img {
+      transform: scale(1.03);
+    }
+    .frame-timestamp {
+      position: absolute;
+      bottom: 0.75rem;
+      left: 0.75rem;
+      padding: 0.25rem 0.65rem;
+      background: rgba(0,0,0,0.75);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--accent);
+      backdrop-filter: blur(8px);
+    }
+    .frame-number {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .frame-analysis {
+      padding: 1.75rem 2rem;
+    }
+    .frame-analysis h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      color: var(--text-primary);
+    }
+
+    .bio-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 600px) {
+      .bio-grid { grid-template-columns: 1fr; }
+    }
+
+    .bio-item {
+      padding: 0.85rem 1rem;
+      background: var(--bg-card-alt);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    .bio-item-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 600;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+    .bio-item-label.legs { color: var(--accent-green); }
+    .bio-item-label.arms { color: var(--accent-blue); }
+    .bio-item-label.core { color: var(--accent-amber); }
+    .bio-item-label.cog { color: var(--accent-rose); }
+    .bio-item-label.technique { color: var(--accent); }
+    .bio-item p {
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      line-height: 1.65;
+    }
+
+    .technique-highlight {
+      grid-column: 1 / -1;
+      background: var(--accent-glow);
+      border-color: var(--border-accent);
+    }
+
+    /* ─── Summary Section ─── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .summary-card {
+      padding: 2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: border-color 0.3s;
+    }
+    .summary-card:hover {
+      border-color: var(--border-accent);
+    }
+    .summary-card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .summary-card ul {
+      list-style: none;
+      padding: 0;
+    }
+    .summary-card li {
+      padding: 0.4rem 0;
+      padding-left: 1.2rem;
+      position: relative;
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+      line-height: 1.65;
+    }
+    .summary-card li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ─── Coaching Cues ─── */
+    .coaching-section {
+      margin: 3rem 0 4rem;
+      padding: 2.5rem;
+      background: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(139,92,246,0.06));
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 16px;
+    }
+    .coaching-section h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent-green), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .coaching-section > p {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+    .cue-list {
+      display: grid;
+      gap: 1rem;
+    }
+    .cue-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      padding: 1.25rem 1.5rem;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .cue-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-size: 1.2rem;
+    }
+    .cue-icon.strength { background: var(--accent-green-glow); }
+    .cue-icon.focus { background: var(--accent-amber-glow); }
+    .cue-icon.next { background: var(--accent-glow); }
+    .cue-item h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: var(--text-primary);
+    }
+    .cue-item p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    /* ─── Rating ─── */
+    .rating-bar {
+      margin-top: 2rem;
+      padding: 1.5rem 2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+    .rating-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .rating-row:last-child { margin-bottom: 0; }
+    .rating-label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      width: 160px;
+      flex-shrink: 0;
+    }
+    .rating-track {
+      flex: 1;
+      height: 8px;
+      background: var(--bg-secondary);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .rating-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 1s ease;
+    }
+    .rating-fill.purple { background: linear-gradient(90deg, var(--accent-soft), var(--accent)); }
+    .rating-fill.green { background: linear-gradient(90deg, #059669, var(--accent-green)); }
+    .rating-fill.amber { background: linear-gradient(90deg, #d97706, var(--accent-amber)); }
+    .rating-fill.blue { background: linear-gradient(90deg, #2563eb, var(--accent-blue)); }
+    .rating-fill.rose { background: linear-gradient(90deg, #e11d48, var(--accent-rose)); }
+    .rating-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      width: 40px;
+      text-align: right;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      padding: 3rem 0;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Hero ─── -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">🧬 Biomechanical Analysis v2</div>
+      <h1>Giselle — Climbing Review</h1>
+      <p>Professional frame-by-frame biomechanical breakdown focusing on <strong>leg drive mechanics</strong>, <strong>high-step flexibility</strong>, and <strong>movement efficiency</strong> across a 36-second bouldering problem.</p>
+      <div class="hero-meta">
+        <div class="hero-meta-item">📅 <span>Feb 19, 2026</span></div>
+        <div class="hero-meta-item">🎬 <span>10 Key Frames</span></div>
+        <div class="hero-meta-item">⏱ <span>36s Duration</span></div>
+        <div class="hero-meta-item">🤖 <span>Claude Opus 4 Analysis</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+
+    <!-- ─── Overall Ratings ─── -->
+    <div class="section-header">
+      <h2>⚡ Performance Snapshot</h2>
+      <p>Aggregate ratings across the entire climb sequence</p>
+    </div>
+
+    <div class="rating-bar">
+      <div class="rating-row">
+        <div class="rating-label">Leg Drive Power</div>
+        <div class="rating-track"><div class="rating-fill green" style="width: 82%"></div></div>
+        <div class="rating-value">8.2</div>
+      </div>
+      <div class="rating-row">
+        <div class="rating-label">High-Step Flexibility</div>
+        <div class="rating-track"><div class="rating-fill purple" style="width: 88%"></div></div>
+        <div class="rating-value">8.8</div>
+      </div>
+      <div class="rating-row">
+        <div class="rating-label">Core Stability</div>
+        <div class="rating-track"><div class="rating-fill amber" style="width: 85%"></div></div>
+        <div class="rating-value">8.5</div>
+      </div>
+      <div class="rating-row">
+        <div class="rating-label">Weight Transfer</div>
+        <div class="rating-track"><div class="rating-fill blue" style="width: 80%"></div></div>
+        <div class="rating-value">8.0</div>
+      </div>
+      <div class="rating-row">
+        <div class="rating-label">Energy Efficiency</div>
+        <div class="rating-track"><div class="rating-fill rose" style="width: 76%"></div></div>
+        <div class="rating-value">7.6</div>
+      </div>
+    </div>
+
+    <!-- ─── Frame-by-Frame Timeline ─── -->
+    <div class="section-header">
+      <h2>🎬 Frame-by-Frame Breakdown</h2>
+      <p>10 key frames extracted at even intervals across the 36-second climb</p>
+    </div>
+
+    <div class="timeline">
+
+      <!-- Frame 1 -->
+      <div class="frame-card">
+        <div class="frame-card-inner">
+          <div class="frame-img-wrap">
+            <img src="giselle-opus-v2-frames/key_01.jpg" alt="Frame 1 — 0.0s" loading="lazy">
+            <div class="frame-timestamp">00:00</div>
+            <div class="frame-number">1</div>
+          </div>
+          <div class="frame-analysis">
+            <h3>High-Step Initiation — Low on the Wall</h3>
+            <div class="bio-grid">
+              <div class="bio-item">
+                <div class="bio-item-label legs">🦵 Leg Drive</div>
+                <p><strong>Left leg:</strong> High-step in progress — hip flexion ~100–110°, knee sharply flexed ~60–70°, heel drawn toward glute. Inside-edge toe placement on a chest-height hold. <strong>Right leg:</strong> Standing/loaded leg in partial squat — hip ~40–50° flexion, knee ~100–110°. Textbook setup for weight transfer and upward drive.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label arms">💪 Arms</div>
+                <p>Both hands on yellow holds at head height. Right arm locked off at ~80–90° (open-hand wrap on volume lip). Left arm at ~70–80° (side-pull grip). Compact positioning — shoulder-width apart. Significant load on both arms during the high-step phase.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label core">🎯 Core</div>
+                <p>Torso rigid and upright with no lumbar hyperextension. Strong anti-rotation stability — no barn-dooring despite the asymmetric leg position. Hip flexors (iliopsoas, rectus femoris) under high demand for the high-step.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label cog">⚖️ Center of Gravity</div>
+                <p>COG positioned close to the wall over the right (standing) foot — biomechanically sound for pre-drive phase. Slightly low position indicates drive hasn't initiated yet. Ready to transfer weight onto the high-stepped left foot.</p>
+              </div>
+              <div class="bio-item technique-highlight">
+                <div class="bio-item-label technique">✨ Technique Note</div>
+                <p>High-step to chest height shows excellent hip flexion ROM (&gt;100°). Square/frontal orientation is appropriate for the hold layout. <em>Coaching cue:</em> Place the high-step foot quickly to minimize time in bent-arm loaded position — reduce forearm pump early in the problem.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 2 -->
+      <div class="frame-card">
+        <div class="frame-card-inner">
+          <div class="frame-img-wrap">
+            <img src="giselle-opus-v2-frames/key_02.jpg" alt="Frame 2 — 4.0s" loading="lazy">
+            <div class="frame-timestamp">00:04</div>
+            <div class="frame-number">2</div>
+          </div>
+          <div class="frame-analysis">
+            <h3>Wide Stable Stance — Rest / Route Reading</h3>
+            <div class="bio-grid">
+              <div class="bio-item">
+                <div class="bio-item-label legs">🦵 Leg Drive</div>
+                <p>Wide stance (~1.2–1.5× shoulder width). <strong>Left:</strong> hip flexion ~30–40°, abduction ~30°, knee ~120–130°. <strong>Right:</strong> hip flexion ~35–45°, abduction ~25–30°, knee ~110–120°. Both feet on inside-edge placements on large yellow volumes — broad triangular base of support.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label arms">💪 Arms</div>
+                <p>Left arm nearly extended (~130–140° elbow) — hanging on skeletal structure for energy conservation. Right arm more bent (~90–100°) in moderate lock-off. Open-hand palm/wrap grips on yellow scoops. Arms spread wider than shoulders, creating rectangular four-point frame.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label core">🎯 Core</div>
+                <p>Sustained core tension keeping hips pressed to wall. Wide stance demands significant adductor and hip stabilizer activation. No visible lateral lean or rotation — obliques and spinal erectors maintaining neutral trunk.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label cog">⚖️ Center of Gravity</div>
+                <p>COG centered between both feet, close to the wall. Wide base provides excellent lateral stability. At approximately hip level, well within the support polygon. This is an energy-efficient rest/planning position.</p>
+              </div>
+              <div class="bio-item technique-highlight">
+                <div class="bio-item-label technique">✨ Technique Note</div>
+                <p>Textbook rest/assessment position — weight distributed across four points, using large volumes for generous foot placements. <em>Coaching cue:</em> Straighten the right arm further to shift more load to skeleton and reduce bicep/forearm fatigue during the pause.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 3 -->
+      <div class="frame-card">
+        <div class="frame-card-inner">
+          <div class="frame-img-wrap">
+            <img src="giselle-opus-v2-frames/key_03.jpg" alt="Frame 3 — 8.0s" loading="lazy">
+            <div class="frame-timestamp">00:08</div>
+            <div class="frame-number">3</div>
+          </div>
+          <div class="frame-analysis">
+            <h3>Compressed Position — Coiling Before Extension</h3>
+            <div class="bio-grid">
+              <div class="bio-item">
+                <div class="bio-item-label legs">🦵 Leg Drive</div>
+                <p><strong>Left:</strong> hip ~60–70° flexion with slight abduction, knee ~80–90° — compressed and loaded, preparing to push. <strong>Right:</strong> hip ~50–60° flexion, knee ~90–100°, inside-edge placement. Moderate shoulder-width stance. Both feet actively loaded — no flagging.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label arms">💪 Arms</div>
+                <p>Both hands on yellow holds at head height with elbows bent ~70–90°. Partial lock-off on both arms simultaneously — this is a high-energy position with both biceps and forearms loaded. Open-hand/palming grips on volume features.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label core">🎯 Core</div>
+                <p>Compact position requires significant core engagement — rectus abdominis and hip flexors preventing hip sag. Strong anti-extension control with no visible torso rotation or collapse. Pelvis stable despite the compressed loading.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label cog">⚖️ Center of Gravity</div>
+                <p>COG close to wall with hips tight against the surface. The compressed bent-arm/bent-leg position stores potential energy in the lower body for upcoming leg drive. Weight driven through the feet effectively.</p>
+              </div>
+              <div class="bio-item technique-highlight">
+                <div class="bio-item-label technique">✨ Technique Note</div>
+                <p>"Coil before spring" — the bent legs store potential for explosive leg drive. This is a transition/setup stance between sequences. <em>Coaching cue:</em> Minimize time in this double-bent-arm position. Either hang on straighter arms or move through dynamically to conserve forearm endurance.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 4 -->
+      <div class="frame-card">
+        <div class="frame-card-inner">
+          <div class="frame-img-wrap">
+            <img src="giselle-opus-v2-frames/key_04.jpg" alt="Frame 4 — 12.0s" loading="lazy">
+            <div class="frame-timestamp">00:12</div>
+            <div class="frame-number">4</div>
+          </div>
+          <div class="frame-analysis">
+            <h3>Lock-Off & Reach — Dynamic High-Step Sequence</h3>
+            <div class="bio-grid">
+              <div class="bio-item">
+                <div class="bio-item-label legs">🦵 Leg Drive</div>
+                <p><strong>Left (high-step):</strong> Hip in deep flexion ~100–120°, knee sharply flexed ~50–60°, foot at hip-to-chest height on inside-edge. Demanding position requiring excellent ROM and quad engagement. <strong>Right (drive):</strong> Standing leg bearing majority of weight — hip ~30–40° flexion, knee ~130–140°. Wide vertical separation between feet.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label arms">💪 Arms</div>
+                <p><strong>Left arm:</strong> Extended high to ~150–160° — near full reach for the next hold (open-hand sloper grip). <strong>Right arm:</strong> Deep lock-off at ~60–80° on a yellow scoop — substantial muscular work stabilizing the body. Classic asymmetric lock-off and reach pattern.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label core">🎯 Core</div>
+                <p>Significant core tension resisting the rotational moment from opposing diagonal forces (right arm lock-off vs. left arm reach). Obliques highly engaged for anti-rotation. Left iliopsoas, rectus femoris, TFL under high load maintaining the high-step. No barn-dooring — excellent stabilization.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label cog">⚖️ Center of Gravity</div>
+                <p>COG transitioning from over the right foot upward and leftward to the high-stepped left foot. Hips moderately close to wall. Subtle hip turnover (left hip rotating in) is reducing effective reach distance — smart biomechanics.</p>
+              </div>
+              <div class="bio-item technique-highlight">
+                <div class="bio-item-label technique">✨ Technique Note</div>
+                <p>Key moment — classic lock-off and reach with nascent hip turn/twist-lock. The high-step is the engine here. <em>Coaching cue:</em> Initiate a simultaneous leg drive from the right foot during the reach to shorten lock-off duration. Emphasize pushing through the left foot rather than pulling with arms once the hand secures.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 5 -->
+      <div class="frame-card">
+        <div class="frame-card-inner">
+          <div class="frame-img-wrap">
+            <img src="giselle-opus-v2-frames/key_05.jpg" alt="Frame 5 — 16.0s" loading="lazy">
+            <div class="frame-timestamp">00:16</div>
+            <div class="frame-number">5</div>
+          </div>
+          <div class="frame-analysis">
+            <h3>Weight Committed — Single-Leg Drive with Hip Turnover</h3>
+            <div class="bio-grid">
+              <div class="bio-item">
+                <div class="bio-item-label legs">🦵 Leg Drive</div>
+                <p><strong>Left (loaded):</strong> Primary weight-bearing in a deep single-leg squat — hip ~80–100° flexion, knee ~70–90°. Massive quad and glute engagement under isometric/eccentric load. <strong>Right (flag):</strong> Extended and trailing — hip ~20–30° flexion, knee ~140–150°. Functioning as counterbalance/flag to prevent barn-door rotation.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label arms">💪 Arms</div>
+                <p>Left arm on yellow scoop at shoulder-to-head height, elbow ~80–100° in moderate lock-off. Right hand reaching or settling on a hold — positioning for the next sequence. The right hip is turned closer to the wall, indicating active twist-lock technique.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label core">🎯 Core</div>
+                <p>The hip turnover/twist-lock demands significant oblique and anti-rotation engagement. Single-leg loading on the left leg requires the core to stabilize the pelvis against lateral and rotational forces. Strong trunk rigidity visible with no sag.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label cog">⚖️ Center of Gravity</div>
+                <p>COG positioned directly over the left (loaded) foot — successful weight transfer from the high-step. The flagging right leg acts as a dynamic counterbalance. Post-high-step, single-leg drive position — textbook execution.</p>
+              </div>
+              <div class="bio-item technique-highlight">
+                <div class="bio-item-label technique">✨ Technique Note</div>
+                <p>Excellent hip turnover — right hip in, reducing reach distance and engaging the powerful posterior chain. The flagging right leg shows awareness of rotational forces. <em>Coaching cue:</em> Drive through the left heel to extend — think "stand up tall" rather than "pull up." The leg is the engine, the arms are just steering.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 6 -->
+      <div class="frame-card">
+        <div class="frame-card-inner">
+          <div class="frame-img-wrap">
+            <img src="giselle-opus-v2-frames/key_06.jpg" alt="Frame 6 — 20.0s" loading="lazy">
+            <div class="frame-timestamp">00:20</div>
+            <div class="frame-number">6</div>
+          </div>
+          <div class="frame-analysis">
+            <h3>Extended Reach — Wide Stem / Bridge Position</h3>
+            <div class="bio-grid">
+              <div class="bio-item">
+                <div class="bio-item-label legs">🦵 Leg Drive</div>
+                <p><strong>Left:</strong> Extended high and left — hip abduction ~40–45°, flexion ~80–90°, knee ~100–110° (moderate high-step, inside-edge smear). <strong>Right:</strong> Extended down and right — nearly straight at ~155–165° knee. Ultra-wide triangular base (~1.0–1.2m lateral spread). Classic stem/bridge position.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label arms">💪 Arms</div>
+                <p>Both arms extended overhead at ~170° (nearly full reach) — matched or near-matched on a large yellow sloper. Open-hand palm-over-sloper technique. Shoulders elevated and slightly internally rotated. Hanging on skeletal structure — energy-efficient.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label core">🎯 Core</div>
+                <p>Torso straight and rigid — strong isometric engagement of rectus abdominis and obliques. The extreme wide stance demands significant adductor and hip stabilizer activation. No trunk rotation visible — clean frontal plane stabilization.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label cog">⚖️ Center of Gravity</div>
+                <p>COG centered between feet, close to wall due to the wide base pulling hips in. Positioned at lower-chest level, slightly biased left toward direction of travel. Stable within the support polygon defined by the wide base.</p>
+              </div>
+              <div class="bio-item technique-highlight">
+                <div class="bio-item-label technique">✨ Technique Note</div>
+                <p>Smart use of wide stem to maximize base of support while reaching high on slopers. Frontal approach with matched hands is correct for downward-pull sloper engagement. <em>Coaching cue:</em> The wide stance may limit upward leg drive from here — bring one foot higher before committing to the next move up.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 7 -->
+      <div class="frame-card">
+        <div class="frame-card-inner">
+          <div class="frame-img-wrap">
+            <img src="giselle-opus-v2-frames/key_07.jpg" alt="Frame 7 — 24.0s" loading="lazy">
+            <div class="frame-timestamp">00:24</div>
+            <div class="frame-number">7</div>
+          </div>
+          <div class="frame-analysis">
+            <h3>Compression / Frog Position — Coiling for Drive</h3>
+            <div class="bio-grid">
+              <div class="bio-item">
+                <div class="bio-item-label legs">🦵 Leg Drive</div>
+                <p><strong>Right (high-step):</strong> Hip flexion ~90–100°, knee sharply flexed ~60–70°, foot at hip-to-chest height on inside edge. Loaded and coiled — primary drive leg. <strong>Left (support):</strong> Extended down-left, hip ~40–50° flexion, abduction ~35–40°, knee ~120–130°. Counterbalance providing stability. Significant hip angle differential primes the system for push.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label arms">💪 Arms</div>
+                <p>Both hands matched at head height with elbows at ~70–90° — compressed "frog" position. Still open-hand sloper grips. Shoulders more depressed with visible scapular engagement (pulled down and back). Arms slightly more bent than ideal for resting.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label core">🎯 Core</div>
+                <p>Hip flexor complex (right-side iliopsoas) under high load for the high-step. Obliques and transverse abdominis stabilizing pelvis against rotational torque from asymmetric stance. Trunk tension visible — no collapse despite asymmetric loading. Gluteal pre-activation on right side for upcoming drive.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label cog">⚖️ Center of Gravity</div>
+                <p>COG shifted upward and inward compared to Frame 6. Hips elevated and close to wall. Weight loading primarily over the right (high-stepped) foot — classic pre-drive weight distribution. Compressed arm position consolidates COG toward wall surface.</p>
+              </div>
+              <div class="bio-item technique-highlight">
+                <div class="bio-item-label technique">✨ Technique Note</div>
+                <p>Excellent "coil before spring" setup — right leg deeply flexed and loaded for explosive extension. Hips brought up before committing to reach. <em>Coaching cue:</em> Consider placing the left foot higher (drop-knee or backstep) to further stabilize and assist the drive. Focus on pushing through the legs, not pulling with the bent arms.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 8 -->
+      <div class="frame-card">
+        <div class="frame-card-inner">
+          <div class="frame-img-wrap">
+            <img src="giselle-opus-v2-frames/key_08.jpg" alt="Frame 8 — 28.0s" loading="lazy">
+            <div class="frame-timestamp">00:28</div>
+            <div class="frame-number">8</div>
+          </div>
+          <div class="frame-analysis">
+            <h3>Standing Up — Post-Drive Recovery Position</h3>
+            <div class="bio-grid">
+              <div class="bio-item">
+                <div class="bio-item-label legs">🦵 Leg Drive</div>
+                <p>Both feet at similar height in a balanced shoulder-width stance. <strong>Left:</strong> hip ~30–40° flexion, knee ~140–150° (relatively straight, weight-bearing). <strong>Right:</strong> hip ~30–40° flexion, knee ~130–140°. Standard inside-edge toe placements on both feet. She has successfully "stood up" from the high-step — the drive is complete.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label arms">💪 Arms</div>
+                <p>Both arms reaching overhead at ~160–170° (near full extension). Left hand on yellow hold, right on pink/orange hold — slightly wider than shoulder width. Open-hand sloper grips. Shoulders elevated with slight protraction. Approaching skeletal-efficient hanging position.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label core">🎯 Core</div>
+                <p>Relatively low core demand — the upright, close-to-wall posture with extended arms is skeletal-efficient. Postural engagement of erector spinae maintaining trunk position. Core in "maintenance mode" — recovering from the intense drive sequence.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label cog">⚖️ Center of Gravity</div>
+                <p>Well-centered between both feet, close to wall. With upright posture and moderate stance width, COG at pelvic level — projecting within the base of support. Stable, balanced recovery position in the upper third of the wall.</p>
+              </div>
+              <div class="bio-item technique-highlight">
+                <div class="bio-item-label technique">✨ Technique Note</div>
+                <p>Beautiful execution — the coiled energy from Frames 6–7 has been converted into vertical gain. Well-executed transition to a balanced stance with good wall proximity and minimal arm pump. <em>Coaching cue:</em> Widen the stance slightly or bring one foot higher to prepare for the next upward move — don't get "stuck standing."</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 9 -->
+      <div class="frame-card">
+        <div class="frame-card-inner">
+          <div class="frame-img-wrap">
+            <img src="giselle-opus-v2-frames/key_09.jpg" alt="Frame 9 — 32.0s" loading="lazy">
+            <div class="frame-timestamp">00:32</div>
+            <div class="frame-number">9</div>
+          </div>
+          <div class="frame-analysis">
+            <h3>Top-Out Press — Leg-Driven Mantle Transition</h3>
+            <div class="bio-grid">
+              <div class="bio-item">
+                <div class="bio-item-label legs">🦵 Leg Drive</div>
+                <p><strong>Left (primary):</strong> Foot on large yellow banana volume — hip ~60–75° flexion, knee ~80–100°. Compressed/loaded position driving the press upward through quads and glutes. Top-of-hold smear requiring precise friction management. <strong>Right (secondary):</strong> Hip ~40–50° flexion, knee ~110–130° on a smaller feature for support/balance.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label arms">💪 Arms</div>
+                <p>Both arms reaching high and slightly wide — left arm at ~150–160° extension, right at ~140–155°. Transitioning from sloper grips to top-out holds or jug features at the wall apex. Minimal pulling — relying primarily on leg drive. Hands may be near the top lip.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label core">🎯 Core</div>
+                <p>The pressing/mantle phase demands significant anterior chain engagement — hip flexors and rectus abdominis resisting the tendency for hips to sag away from the wall. Visible trunk tension with no lumbar hyperextension. Left glute max and quads are the primary movers.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label cog">⚖️ Center of Gravity</div>
+                <p>COG shifting upward and slightly forward in the press trajectory. Positioned over the left (higher) foot. Close to wall surface — essential for maintaining friction on the slopey volume smear. Forward-and-up trajectory through the mantle.</p>
+              </div>
+              <div class="bio-item technique-highlight">
+                <div class="bio-item-label technique">✨ Technique Note</div>
+                <p>Excellent leg-driven press — correctly using leg extension over arm pulling for the top-out. Smart beta placing the foot on the large volume for maximum smear surface. <em>Coaching cue:</em> Drive hips more aggressively INTO the wall during the press to maximize friction. Bring the right foot higher to create a more symmetrical pressing platform.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 10 -->
+      <div class="frame-card">
+        <div class="frame-card-inner">
+          <div class="frame-img-wrap">
+            <img src="giselle-opus-v2-frames/key_10.jpg" alt="Frame 10 — 36.0s" loading="lazy">
+            <div class="frame-timestamp">00:36</div>
+            <div class="frame-number">10</div>
+          </div>
+          <div class="frame-analysis">
+            <h3>Top-Out Completion — Final Reach</h3>
+            <div class="bio-grid">
+              <div class="bio-item">
+                <div class="bio-item-label legs">🦵 Leg Drive</div>
+                <p><strong>Left:</strong> Partially extended from the press — hip ~40–55°, knee ~120–140°. Successfully driven upward. <strong>Right:</strong> Extended and trailing — hip ~25–35°, knee ~150–160°, possibly flagging slightly right for balance. Narrower, staggered stance — feet less spread than earlier frames.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label arms">💪 Arms</div>
+                <p><strong>Left arm:</strong> Fully extended overhead at ~170–175° — the final reach for the top hold/finishing jug. <strong>Right arm:</strong> Lock-off at ~90–110° on an intermediate hold, stabilizing the body for the final reach. Diagonal tension line from right hand through torso to left foot.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label core">🎯 Core</div>
+                <p>Maximum anti-rotation demand — left arm reaching high while right arm stabilizes lower creates significant rotational torque. Obliques and transverse abdominis firing hard. Left lateral chain (obliques, hip stabilizers) particularly loaded. Trunk rigid and controlled — no barn-dooring.</p>
+              </div>
+              <div class="bio-item">
+                <div class="bio-item-label cog">⚖️ Center of Gravity</div>
+                <p>COG high at upper-abdomen level, slightly left of center over the primary left foot. Diagonal tension line from right hand through COG to left foot provides stability. Close to wall — maintaining friction at the critical top-out height.</p>
+              </div>
+              <div class="bio-item technique-highlight">
+                <div class="bio-item-label technique">✨ Technique Note</div>
+                <p>Strong finish — the right arm lock-off at ~90–110° creates a stable platform for the final dynamic reach. Excellent body tension maintained to the last move. The press from Frame 9 has been successfully converted into the top-out extension. 🎉</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /timeline -->
+
+    <!-- ─── Overall Summary ─── -->
+    <div class="section-header">
+      <h2>📊 Movement Pattern Summary</h2>
+      <p>Key biomechanical themes across the entire sequence</p>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <h3>💚 Strengths</h3>
+        <ul>
+          <li><strong>Exceptional hip flexion ROM</strong> — high-steps consistently achieve 100–120° hip flexion, well above average for recreational climbers</li>
+          <li><strong>Solid core stabilization</strong> — no barn-dooring or hip sag observed across any frame, even during asymmetric loading</li>
+          <li><strong>Leg-driven movement</strong> — clearly uses legs as the primary engine, especially in the top-out press (Frames 9–10)</li>
+          <li><strong>Smart beta decisions</strong> — choosing large volumes for smearing, using wide stems for stability on slopers</li>
+          <li><strong>Hip turnover awareness</strong> — subtle but present twist-lock technique in Frames 4–5 shows developing technical sophistication</li>
+          <li><strong>Effective rest positioning</strong> — Frame 2 shows awareness of when to pause and distribute load across four points</li>
+        </ul>
+      </div>
+      <div class="summary-card">
+        <h3>🔶 Areas for Development</h3>
+        <ul>
+          <li><strong>Bent-arm duration</strong> — several frames show both arms bent simultaneously (~70–90°), burning forearm endurance. Practice hanging on straighter arms whenever hold geometry allows</li>
+          <li><strong>Lock-off depth vs. speed</strong> — the right-arm lock-off in Frame 4 (~60–80°) is deep and energy-intensive. Combine it with a simultaneous leg push to reduce hold time</li>
+          <li><strong>Foot progression before reaching</strong> — in Frames 6 and 8, feet could be brought higher before committing to the next arm reach to reduce upper body load</li>
+          <li><strong>Drop-knee / backstep integration</strong> — limited use of drop-knees observed. These would help stabilize and create additional reach on steep sections</li>
+          <li><strong>Dynamic movement</strong> — the climbing style is primarily static. Introducing controlled dynamic moves (deadpoints) could save energy on longer sequences</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ─── Coaching Cues ─── -->
+    <div class="coaching-section">
+      <h2>🎯 Coaching Cues for Giselle</h2>
+      <p>Actionable takeaways to level up — you're already doing a lot right, these will make great even better.</p>
+
+      <div class="cue-list">
+        <div class="cue-item">
+          <div class="cue-icon strength">💪</div>
+          <div>
+            <h4>Your Leg Drive is Your Superpower</h4>
+            <p>You naturally use your legs as the primary engine — this is <em>huge</em>. Most beginners pull with their arms. Your high-steps at 100–120° hip flexion are genuinely impressive and show real flexibility. Keep leaning into this strength. When you feel yourself pulling, reset mentally: <strong>"Stand up, don't pull up."</strong></p>
+          </div>
+        </div>
+
+        <div class="cue-item">
+          <div class="cue-icon strength">🧘</div>
+          <div>
+            <h4>Your Core Stability is Rock Solid</h4>
+            <p>Zero barn-dooring across 10 frames of asymmetric loading — that's excellent body tension. Your ability to hold position during high-steps and lock-offs shows strong oblique and hip stabilizer engagement. This gives you a foundation that many climbers lack. <strong>Trust your core — it's got you.</strong></p>
+          </div>
+        </div>
+
+        <div class="cue-item">
+          <div class="cue-icon focus">🦴</div>
+          <div>
+            <h4>Hang on the Skeleton, Not the Muscles</h4>
+            <p>When you're resting or reading the route, practice straightening your arms completely. Think "dead hang with straight elbows" — let the bones and tendons do the work, not the biceps. You do this well in some frames (Frame 6, Frame 8) but bend too much in others (Frame 3). <strong>Straight arms = free energy.</strong></p>
+          </div>
+        </div>
+
+        <div class="cue-item">
+          <div class="cue-icon focus">⏱️</div>
+          <div>
+            <h4>Speed Up the High-Step Placement</h4>
+            <p>Your high-steps are beautifully placed — but the time between initiating the step and weighting it is where you can save energy. Practice the cue: <strong>"Place it, weight it, go."</strong> The faster you transfer weight onto that high foot, the less time your arms spend in an energy-expensive lock-off. One smooth motion, not a pause-and-check.</p>
+          </div>
+        </div>
+
+        <div class="cue-item">
+          <div class="cue-icon next">🔄</div>
+          <div>
+            <h4>Add Drop-Knees to Your Toolbox</h4>
+            <p>You have the flexibility for amazing drop-knees — your hip ROM proves it. On moves where you're flagging with a trailing leg (like Frame 5), try rotating that trailing knee inward into a drop-knee instead. It creates a stable tripod, brings your hips closer to the wall, and gives you extra reach. <strong>Next session: pick one route and force yourself to drop-knee every other move.</strong></p>
+          </div>
+        </div>
+
+        <div class="cue-item">
+          <div class="cue-icon next">🚀</div>
+          <div>
+            <h4>Feet Before Hands</h4>
+            <p>Before every hand reach, ask yourself: <strong>"Can I move a foot higher first?"</strong> In several frames, your feet could be one hold higher before you commit to the reach. Higher feet = less arm load = more endurance for the whole climb. Make it a drill: on easy routes, move your feet twice for every hand move.</p>
+          </div>
+        </div>
+
+        <div class="cue-item">
+          <div class="cue-icon strength">🌟</div>
+          <div>
+            <h4>You're Crushing It</h4>
+            <p>Seriously — the movement quality in this video shows real climbing intelligence. The way you read the route, use rest positions, drive through your legs, and maintain body tension is beyond what most people show at this stage. The details above are refinements, not fixes. <strong>Keep climbing, keep pushing, and trust the process.</strong> You've got this. 💜</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+
+  <footer>
+    <p>Built with 🧬 by <a href="#">Fetch</a> — Claude Opus 4 Biomechanical Analysis • Feb 19, 2026</p>
+  </footer>
+
+</body>
+</html>
