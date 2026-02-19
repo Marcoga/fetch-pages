@@ -3,148 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Climbing Session Review | Feb 19, 2026</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Marco's Interactive Session Review | Fetch</title>
     <style>
-        :root { --bg: #0a0a0a; --card: #141414; --accent: #fbbf24; --text: #f5f5f5; --muted: #a3a3a3; --border: #262626; }
+        :root { --bg: #0a0a0a; --card: #141414; --accent: #fbbf24; --text: #f5f5f5; --muted: #a3a3a3; --border: #262626; --blue: #38bdf8; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); max-width: 900px; margin: 0 auto; padding: 2rem; }
         h1 { color: var(--accent); margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
-        .session-grid { display: flex; flex-direction: column; gap: 3rem; }
-        .climb-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+        .climb-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 4rem; }
         .climb-header { padding: 1.5rem; border-bottom: 1px solid var(--border); background: rgba(251, 191, 36, 0.05); }
         .climb-header h2 { margin: 0; font-size: 1.4rem; color: var(--accent); }
         .climb-content { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; padding: 1.5rem; }
         @media (max-width: 700px) { .climb-content { grid-template-columns: 1fr; } }
-        .climb-gif { width: 100%; border-radius: 12px; border: 1px solid var(--border); }
-        .feedback-section h3 { font-size: 1.1rem; color: var(--text); margin-bottom: 0.5rem; }
-        .feedback-text { font-size: 0.95rem; color: var(--muted); line-height: 1.6; }
-        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-bottom: 1rem; text-transform: uppercase; }
+        
+        .gif-container { position: relative; width: 320px; height: 565px; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+        .climb-gif { width: 100%; height: 100%; object-fit: cover; }
+        
+        .smart-overlay {
+            position: absolute; left: 10px; right: 10px;
+            background: rgba(0,0,0,0.9); color: #fff; padding: 12px;
+            border-radius: 8px; font-size: 0.9rem; font-weight: bold;
+            text-align: center; border-left: 5px solid var(--blue);
+            opacity: 0; transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .smart-overlay.active { opacity: 1; transform: translateY(0); }
+        .overlay-top { top: 30px; }
+        .overlay-mid { top: 200px; }
+        .overlay-bot { bottom: 30px; }
+
+        .feedback-section h3 { color: var(--blue); margin-bottom: 1rem; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; }
+        .feedback-text { color: var(--muted); line-height: 1.6; }
+        .tag { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .tag.success { background: #22c55e; color: #000; }
         .tag.fail { background: #ef4444; color: #fff; }
-        .homework { background: rgba(56, 189, 248, 0.1); border-left: 4px solid #38bdf8; padding: 1rem; margin-top: 1rem; border-radius: 0 8px 8px 0; }
-        .homework b { color: #38bdf8; }
     </style>
 </head>
 <body>
-    <h1>🧗 Session Review: Feb 19, 2026</h1>
-    <p>A deep dive into your technique across 6 specific attempts today.</p>
+    <h1>🧗 Session Mastery: Marco</h1>
+    <p style="margin-bottom: 3rem; color: var(--muted);">Coach Fetch in your pocket. Tips trigger as you scroll to each route.</p>
 
     <div class="session-grid">
-        <!-- Climb 1 -->
+        <!-- Climb 1: The Send -->
         <div class="climb-card">
             <div class="climb-header">
                 <span class="tag success">Success</span>
-                <h2>1. The Final Send (Controlled Finish)</h2>
+                <h2>1. The Final Gold Standard</h2>
             </div>
             <div class="climb-content">
-                <div class="gif-container" style="position: relative; width: 320px;">
-                    <img src="assets/climb-gifs/climb_1.gif" class="climb-gif" alt="Climb 1">
-                    <div class="overlay-text" style="position: absolute; top: 20px; left: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-align: center; border: 1px solid var(--accent); animation: fadeOut 4s forwards;">Full arm extension - Perfect!</div>
+                <div class="gif-container">
+                    <img src="assets/climb-gifs/climb_1.gif" class="climb-gif">
+                    <div class="smart-overlay overlay-top" data-delay="1000" data-dur="4000">PERFECT! Arms are dead straight here.</div>
+                    <div class="smart-overlay overlay-mid" data-delay="7000" data-dur="4000">Notice the hips twisting in toward the wall.</div>
+                    <div class="smart-overlay overlay-bot" data-delay="13000" data-dur="5000">Finish is controlled. This is the goal for EVERY climb!</div>
                 </div>
                 <div class="feedback-section">
-                    <h3>Analysis</h3>
-                    <p class="feedback-text">Your best form of the day. You utilized <b>full arm extension</b> on the top reaches, which kept your pump under control. Footwork was precise on the purple chips.</p>
-                    <div class="homework"><b>Key Takeaway:</b> This is your "Gold Standard." Notice how much calmer you look when your arms are straight.</div>
+                    <h3>The Breakthrough</h3>
+                    <p class="feedback-text">This attempt shows you successfully applying the feedback mid-session. You used skeletal structure to hang and precise toe-tips for stability.</p>
                 </div>
             </div>
         </div>
 
-        <!-- Climb 2 -->
+        <!-- Climb 6: Pumpy Crux -->
         <div class="climb-card">
             <div class="climb-header">
                 <span class="tag fail">Fall</span>
-                <h2>2. The Horizontal Traverse</h2>
+                <h2>2. The Pumpy Crux (Energy Leak)</h2>
             </div>
             <div class="climb-content">
-                <div class="gif-container" style="position: relative; width: 320px;">
-                    <img src="assets/climb-gifs/climb_2.gif" class="climb-gif" alt="Climb 2">
-                    <div class="overlay-text" style="position: absolute; top: 20px; left: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-align: center; border: 1px solid var(--accent); animation: fadeOut 4s forwards;">Hips drifting away from wall</div>
+                <div class="gif-container">
+                    <img src="assets/climb-gifs/climb_6.gif" class="climb-gif">
+                    <div class="smart-overlay overlay-top" data-delay="1000" data-dur="4000">DANGER: Arms are already bent here. Energy leak!</div>
+                    <div class="smart-overlay overlay-mid" data-delay="6000" data-dur="4000">The "Pump" takes over. You're muscling it.</div>
+                    <div class="smart-overlay overlay-bot" data-delay="12000" data-dur="5000">CRITICAL: Straighten arms here next time to shake out!</div>
                 </div>
                 <div class="feedback-section">
-                    <h3>Analysis</h3>
-                    <p class="feedback-text">A challenging horizontal sequence. You struggled with <b>hip proximity</b> here—as you moved sideways, your center of mass drifted away from the wall, making the holds feel "greasier."</p>
-                    <div class="homework"><b>Drill:</b> Practice "Belly to Wall" traverses. Focus on keeping your belt buckle as close to the rock as possible.</div>
+                    <h3>Energy Management</h3>
+                    <p class="feedback-text">When you get tired, your brain reverts to "pull harder" instead of "hang better." You need to fight that instinct and force your elbows straight.</p>
                 </div>
             </div>
         </div>
 
-        <!-- Climb 3 -->
+        <!-- Climb 5: High Reach -->
         <div class="climb-card">
             <div class="climb-header">
                 <span class="tag fail">Fall</span>
-                <h2>3. Purple & Beige Sequence</h2>
+                <h2>3. The High Orange Reach</h2>
             </div>
             <div class="climb-content">
-                <div class="gif-container" style="position: relative; width: 320px;">
-                    <img src="assets/climb-gifs/climb_3.gif" class="climb-gif" alt="Climb 3">
-                    <div class="overlay-text" style="position: absolute; top: 20px; left: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-align: center; border: 1px solid var(--accent); animation: fadeOut 4s forwards;">Feet not set before hand move</div>
+                <div class="gif-container">
+                    <img src="assets/climb-gifs/climb_5.gif" class="climb-gif">
+                    <div class="smart-overlay overlay-top" data-delay="1000" data-dur="4000">Try FLAGGING your left leg here for balance.</div>
+                    <div class="smart-overlay overlay-mid" data-delay="6000" data-dur="4000">Watch your hips pop off the wall as you reach.</div>
+                    <div class="smart-overlay overlay-bot" data-delay="11000" data-dur="5000">The "Pop": Without foot tension, the reach fails.</div>
                 </div>
                 <div class="feedback-section">
-                    <h3>Analysis</h3>
-                    <p class="feedback-text">Good effort on technical holds. The fall happened during a <b>dynamic weight shift</b> where your feet weren't fully set before the hand move.</p>
-                    <div class="homework"><b>Drill:</b> "Silent Feet." You shouldn't hear your shoes touch the wall. If you do, it means you're rushing the placement.</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Climb 4 -->
-        <div class="climb-card">
-            <div class="climb-header">
-                <span class="tag success">Success</span>
-                <h2>4. Black Volume Mastery</h2>
-            </div>
-            <div class="climb-content">
-                <div class="gif-container" style="position: relative; width: 320px;">
-                    <img src="assets/climb-gifs/climb_4.gif" class="climb-gif" alt="Climb 4">
-                    <div class="overlay-text" style="position: absolute; top: 20px; left: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-align: center; border: 1px solid var(--accent); animation: fadeOut 4s forwards;">Great smearing on volumes!</div>
-                </div>
-                <div class="feedback-section">
-                    <h3>Analysis</h3>
-                    <p class="feedback-text">Great use of the large black volumes! You showed <b>agility and confidence</b> moving through the scrunched-up sections without over-pulling.</p>
-                    <div class="homework"><b>Key Takeaway:</b> You're getting much more comfortable smearing on large surfaces. Keep that trust in your rubber!</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Climb 5 -->
-        <div class="climb-card">
-            <div class="climb-header">
-                <span class="tag fail">Fall</span>
-                <h2>5. The High Reach Slip</h2>
-            </div>
-            <div class="climb-content">
-                <div class="gif-container" style="position: relative; width: 320px;">
-                    <img src="assets/climb-gifs/climb_5.gif" class="climb-gif" alt="Climb 5">
-                    <div class="overlay-text" style="position: absolute; top: 20px; left: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-align: center; border: 1px solid var(--accent); animation: fadeOut 4s forwards;">Foot cut off mid-reach</div>
-                </div>
-                <div class="feedback-section">
-                    <h3>Analysis</h3>
-                    <p class="feedback-text">You went for a high orange hold but <b>lost balance mid-reach</b>. Your trailing foot "cut" (popped off), which sent your momentum away from the wall.</p>
-                    <div class="homework"><b>Drill:</b> "Flagging." Practice extending your non-pushing leg out to the side to act as a counterweight during big reaches.</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Climb 6 -->
-        <div class="climb-card">
-            <div class="climb-header">
-                <span class="tag fail">Fall</span>
-                <h2>6. The Pumpy Crux</h2>
-            </div>
-            <div class="climb-content">
-                <div class="gif-container" style="position: relative; width: 320px;">
-                    <img src="assets/climb-gifs/climb_6.gif" class="climb-gif" alt="Climb 6">
-                    <div class="overlay-text" style="position: absolute; top: 20px; left: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-align: center; border: 1px solid var(--accent); animation: fadeOut 4s forwards;">Arms are bent - Energy leak!</div>
-                </div>
-                <div class="feedback-section">
-                    <h3>Analysis</h3>
-                    <p class="feedback-text">By this point in the video, <b>forearm fatigue</b> was visible. You reverted to the "bent-arm" habit, which accelerated the pump until your grip simply gave out.</p>
-                    <div class="homework"><b>Strategy:</b> When you feel the pump coming, don't climb faster. Stop, find a straight-arm hang, and shake out for 5 seconds.</div>
+                    <h3>Counterbalance</h3>
+                    <p class="feedback-text">You lost balance mid-reach because your center of mass was unsupported. Extending your free leg (flagging) would have kept you glued to the wall.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <p style="text-align: center; margin-top: 4rem; color: var(--muted);">⚡ <em>"Reviewing your falls is the fastest way to the top."</em> — Fetch</p>
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const overlays = entry.target.querySelectorAll('.smart-overlay');
+                    overlays.forEach(ov => {
+                        const delay = parseInt(ov.getAttribute('data-delay'));
+                        const duration = parseInt(ov.getAttribute('data-dur'));
+                        setTimeout(() => {
+                            ov.classList.add('active');
+                            setTimeout(() => { ov.classList.remove('active'); }, duration);
+                        }, delay);
+                    });
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.climb-card').forEach(card => observer.observe(card));
+    </script>
 </body>
 </html>
