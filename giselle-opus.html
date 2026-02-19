@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giselle — Climbing Biomechanical Analysis</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a26;
+      --bg-card-hover: #22222f;
+      --accent: #8b5cf6;
+      --accent-soft: #7c3aed;
+      --accent-glow: rgba(139, 92, 246, 0.15);
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-primary: #e4e4e7;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --border: #27272a;
+      --border-accent: rgba(139, 92, 246, 0.3);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      padding: 5rem 2rem 4rem;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(139,92,246,0.08) 0%, transparent 70%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      background: var(--accent-glow);
+      border: 1px solid var(--border-accent);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Section titles */
+    .section-header {
+      padding: 3.5rem 0 2rem;
+    }
+    .section-header h2 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+    .section-header p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* Frame gallery */
+    .frame-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+    .frame-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .frame-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+    .frame-card img {
+      width: 100%;
+      aspect-ratio: 16/12;
+      object-fit: cover;
+      display: block;
+    }
+    .frame-card .label {
+      padding: 0.8rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .frame-card .label .time {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    /* Analysis cards */
+    .analysis-sequence {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    .analysis-card {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.25s;
+    }
+    .analysis-card:hover {
+      border-color: var(--border-accent);
+    }
+    .analysis-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      min-height: 260px;
+    }
+    .analysis-content {
+      padding: 1.8rem 2rem 1.8rem 0;
+    }
+    .analysis-content h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .analysis-content h3 .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .phase-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.8rem;
+    }
+    .analysis-content p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 0.8rem;
+      line-height: 1.7;
+    }
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 1rem;
+    }
+    .tech-tag {
+      padding: 0.25rem 0.7rem;
+      font-size: 0.72rem;
+      font-weight: 500;
+      border-radius: 100px;
+      background: rgba(139,92,246,0.1);
+      color: var(--accent);
+      border: 1px solid rgba(139,92,246,0.2);
+    }
+    .tech-tag.strength {
+      background: rgba(16,185,129,0.1);
+      color: var(--accent-green);
+      border-color: rgba(16,185,129,0.2);
+    }
+    .tech-tag.improve {
+      background: rgba(245,158,11,0.1);
+      color: var(--accent-amber);
+      border-color: rgba(245,158,11,0.2);
+    }
+
+    /* Summary panels */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .summary-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+    }
+    .summary-panel h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .summary-panel ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .summary-panel li {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      padding-left: 1.5rem;
+      position: relative;
+      line-height: 1.6;
+    }
+    .summary-panel li::before {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    .summary-panel.strengths li::before {
+      content: '✦';
+      color: var(--accent-green);
+    }
+    .summary-panel.improvements li::before {
+      content: '▸';
+      color: var(--accent-amber);
+    }
+
+    /* Coaching cues */
+    .coaching-section {
+      margin-bottom: 4rem;
+    }
+    .coaching-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.2rem;
+    }
+    .cue-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.6rem;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .cue-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-green));
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .cue-card:hover::before { opacity: 1; }
+    .cue-card:hover {
+      border-color: var(--border-accent);
+      transform: translateY(-1px);
+    }
+    .cue-card .cue-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .cue-card h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .cue-card p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+    .cue-card .cue-phrase {
+      margin-top: 0.8rem;
+      padding: 0.6rem 1rem;
+      background: rgba(139,92,246,0.08);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--text-primary);
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0;
+      text-align: center;
+    }
+    .footer p {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    /* Lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(20px);
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+    .lightbox.active { display: flex; }
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .analysis-card {
+        grid-template-columns: 1fr;
+      }
+      .analysis-card img {
+        min-height: 200px;
+        max-height: 250px;
+      }
+      .analysis-content {
+        padding: 1.2rem 1.5rem 1.5rem;
+      }
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero { padding: 3rem 1.5rem 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-badge">🧗‍♀️ Video Analysis</div>
+    <h1>Giselle — Climbing Review</h1>
+    <p>Professional biomechanical analysis of indoor bouldering technique. 10 key frames extracted and annotated with coaching insights.</p>
+  </header>
+
+  <main class="container">
+
+    <!-- Frame Gallery -->
+    <div class="section-header">
+      <h2>📸 Extracted Frames</h2>
+      <p>10 key moments captured at ~4.4-second intervals across the 48-second climb</p>
+    </div>
+
+    <div class="frame-grid">
+      <div class="frame-card" onclick="openLightbox(this)">
+        <img src="giselle-frames/frame_00.jpg" alt="Frame 0" loading="lazy">
+        <div class="label">Frame 01 <span class="time">~4.4s</span></div>
+      </div>
+      <div class="frame-card" onclick="openLightbox(this)">
+        <img src="giselle-frames/frame_01.jpg" alt="Frame 1" loading="lazy">
+        <div class="label">Frame 02 <span class="time">~8.8s</span></div>
+      </div>
+      <div class="frame-card" onclick="openLightbox(this)">
+        <img src="giselle-frames/frame_02.jpg" alt="Frame 2" loading="lazy">
+        <div class="label">Frame 03 <span class="time">~13.1s</span></div>
+      </div>
+      <div class="frame-card" onclick="openLightbox(this)">
+        <img src="giselle-frames/frame_03.jpg" alt="Frame 3" loading="lazy">
+        <div class="label">Frame 04 <span class="time">~17.5s</span></div>
+      </div>
+      <div class="frame-card" onclick="openLightbox(this)">
+        <img src="giselle-frames/frame_04.jpg" alt="Frame 4" loading="lazy">
+        <div class="label">Frame 05 <span class="time">~21.9s</span></div>
+      </div>
+      <div class="frame-card" onclick="openLightbox(this)">
+        <img src="giselle-frames/frame_05.jpg" alt="Frame 5" loading="lazy">
+        <div class="label">Frame 06 <span class="time">~26.3s</span></div>
+      </div>
+      <div class="frame-card" onclick="openLightbox(this)">
+        <img src="giselle-frames/frame_06.jpg" alt="Frame 6" loading="lazy">
+        <div class="label">Frame 07 <span class="time">~30.6s</span></div>
+      </div>
+      <div class="frame-card" onclick="openLightbox(this)">
+        <img src="giselle-frames/frame_07.jpg" alt="Frame 7" loading="lazy">
+        <div class="label">Frame 08 <span class="time">~35.0s</span></div>
+      </div>
+      <div class="frame-card" onclick="openLightbox(this)">
+        <img src="giselle-frames/frame_08.jpg" alt="Frame 8" loading="lazy">
+        <div class="label">Frame 09 <span class="time">~39.4s</span></div>
+      </div>
+      <div class="frame-card" onclick="openLightbox(this)">
+        <img src="giselle-frames/frame_09.jpg" alt="Frame 9" loading="lazy">
+        <div class="label">Frame 10 <span class="time">~43.8s</span></div>
+      </div>
+    </div>
+
+    <!-- Detailed Analysis -->
+    <div class="section-header">
+      <h2>🔬 Frame-by-Frame Analysis</h2>
+      <p>Movement phases mapped across the complete climb sequence</p>
+    </div>
+
+    <div class="analysis-sequence">
+
+      <!-- Phase 1: Frames 1-2 -->
+      <div class="analysis-card">
+        <img src="giselle-frames/frame_00.jpg" alt="Setup phase">
+        <div class="analysis-content">
+          <div class="phase-label">Phase 1 — Setup &amp; Loading</div>
+          <h3><span class="num">1</span> Initiating the Sequence</h3>
+          <p>Giselle starts low on the wall in a compressed stance — left knee deeply bent (~90°+), both hands gripping purple holds at shoulder-to-head height. The right foot trails lower, establishing a stable triangular base. Toe placement on the left foot is precise (toe-down on the volume), showing excellent footwork discipline.</p>
+          <p>Centre of gravity sits low and centred between both feet, biased toward the loaded left foot. Hips are largely square to the wall — acceptable for setup, though earlier hip rotation would reduce arm load.</p>
+          <div class="tech-tags">
+            <span class="tech-tag strength">Precise toe placement</span>
+            <span class="tech-tag strength">Low CoG — stable</span>
+            <span class="tech-tag">Compressed stance</span>
+            <span class="tech-tag improve">Arms bent at rest</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <img src="giselle-frames/frame_01.jpg" alt="Loading phase">
+        <div class="analysis-content">
+          <div class="phase-label">Phase 1 — Setup &amp; Loading</div>
+          <h3><span class="num">2</span> Pre-loading the Drive Leg</h3>
+          <p>Weight shifts decisively over the left foot. The deep knee bend positions hips almost directly above the left toe — biomechanically ideal for the upcoming drive phase. The left hip begins rotating toward the wall, a subtle but positive shift that narrows her profile.</p>
+          <p>Right leg extends behind/below in a nascent <strong>flag</strong> position, providing counter-rotation stability. The "coiled spring" compression in the left leg stores potential energy for upward movement.</p>
+          <div class="tech-tags">
+            <span class="tech-tag strength">Weight over drive foot</span>
+            <span class="tech-tag strength">Early hip rotation</span>
+            <span class="tech-tag">Nascent flag</span>
+            <span class="tech-tag improve">Straight-arm hang needed</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 2: Frames 3-4 -->
+      <div class="analysis-card">
+        <img src="giselle-frames/frame_02.jpg" alt="Drive phase">
+        <div class="analysis-content">
+          <div class="phase-label">Phase 2 — Hip Turn &amp; Drive</div>
+          <h3><span class="num">3</span> Twist-Lock Execution</h3>
+          <p>The defining moment: <strong>left hip turns decisively into the wall</strong> — a textbook twist-lock/Egyptian technique. This extends reach on the left hand, reduces effective distance to the next hold, and keeps the CoG close to the wall plane despite the dynamic movement.</p>
+          <p>The left leg is clearly the primary driver — pushing through the foot to propel upward as the knee extends from the compressed position. The right leg extends diagonally behind as a <strong>flag</strong>, preventing barn-door swing. Hands are well-separated (high-left, mid-right) creating a wide upper-body support base.</p>
+          <div class="tech-tags">
+            <span class="tech-tag strength">Twist-lock / hip turn</span>
+            <span class="tech-tag strength">Leg-driven propulsion</span>
+            <span class="tech-tag strength">Active flagging</span>
+            <span class="tech-tag">Wide arm separation</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <img src="giselle-frames/frame_03.jpg" alt="Extension phase">
+        <div class="analysis-content">
+          <div class="phase-label">Phase 2 — Hip Turn &amp; Drive</div>
+          <h3><span class="num">4</span> Full Extension Reached</h3>
+          <p>Near the apex of the drive sequence — both arms reaching overhead, body elongated. Both feet bear weight on holds at knee-to-thigh height, knees moderately bent. The feet have tracked upward with the hands (not lagging below), preventing the overloaded "stretched out" position.</p>
+          <p>Hips return toward square as both hands settle on high holds — natural during a two-hand stabilisation phase. This is an ideal moment for route-reading the next sequence.</p>
+          <div class="tech-tags">
+            <span class="tech-tag strength">Feet track with hands</span>
+            <span class="tech-tag strength">Skeletal arm hang</span>
+            <span class="tech-tag">Route-reading window</span>
+            <span class="tech-tag improve">Hips slightly off wall</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 3: Frames 5-6 -->
+      <div class="analysis-card">
+        <img src="giselle-frames/frame_04.jpg" alt="Volume stance">
+        <div class="analysis-content">
+          <div class="phase-label">Phase 3 — Volume Work &amp; Compression</div>
+          <h3><span class="num">5</span> Frog Position on Volume</h3>
+          <p>Both feet now stand on the large white volume — a wide-kneed, deep-squat "frog" position. Hands are close together (near-matched) on the dual slopers above, signalling preparation for a significant reach. The wide platform provides much more security than small footholds.</p>
+          <p>Despite the protruding volume, Giselle keeps her torso close to the wall surface — excellent spatial awareness. Standing on a rounded/sculpted volume requires good proprioception and ankle stability, both well-demonstrated here.</p>
+          <div class="tech-tags">
+            <span class="tech-tag strength">Creative volume use</span>
+            <span class="tech-tag strength">Deep compression ready</span>
+            <span class="tech-tag strength">Ankle stability</span>
+            <span class="tech-tag">Matched hands — drive pending</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <img src="giselle-frames/frame_05.jpg" alt="Second setup">
+        <div class="analysis-content">
+          <div class="phase-label">Phase 3 — Volume Work &amp; Compression</div>
+          <h3><span class="num">6</span> Reset &amp; Weight Redistribution</h3>
+          <p>Transitional position as Giselle redistributes weight. Left hand on a white sloper at head height, right hand reaching toward a banana-shaped hold. Left foot uses inside-edge placement on the volume with visible knee bend; right foot on a smaller hold with precise toe-tip placement.</p>
+          <p>The right arm extends relatively straight — good energy conservation on the reaching side. Both feet have advanced upward, maintaining the base of support close to the hands rather than dangling low.</p>
+          <div class="tech-tags">
+            <span class="tech-tag strength">Straight reaching arm</span>
+            <span class="tech-tag strength">Feet track upward</span>
+            <span class="tech-tag">Inside-edge placement</span>
+            <span class="tech-tag improve">Square hips limit reach</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 4: Frames 7-8 -->
+      <div class="analysis-card">
+        <img src="giselle-frames/frame_06.jpg" alt="High step">
+        <div class="analysis-content">
+          <div class="phase-label">Phase 4 — Crux High-Step Sequence</div>
+          <h3><span class="num">7</span> The High-Step — Crux Move</h3>
+          <p><strong>The crux moment.</strong> Left foot executes a demanding high-step — placed at approximately hip height or higher, requiring significant hip flexion, quad engagement, and ankle mobility. The body is maximally compressed: head close to the wall, knees deeply flexed, both arms loaded at tight angles (~90°).</p>
+          <p>A subtle but biomechanically correct right-hip-out rotation opens the left hip joint, allowing the knee to track upward efficiently. This "get small before getting tall" pattern is textbook for generating height without dynamic movement.</p>
+          <div class="tech-tags">
+            <span class="tech-tag strength">High-step execution</span>
+            <span class="tech-tag strength">Hip flexibility</span>
+            <span class="tech-tag strength">Compression discipline</span>
+            <span class="tech-tag">Quad/glute loaded</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <img src="giselle-frames/frame_07.jpg" alt="Drive from high step">
+        <div class="analysis-content">
+          <div class="phase-label">Phase 4 — Crux High-Step Sequence</div>
+          <h3><span class="num">8</span> Driving Through the High-Step</h3>
+          <p>The payoff: Giselle has extended dramatically from the compressed Frame 7 position. Left leg — now the primary driver — has straightened significantly as she pushes upward. Left hand reaches a new hold at full overhead extension while the right arm stabilises at chest height.</p>
+          <p>Pronounced <strong>left-hip-in twist-lock</strong> lengthens the left arm's reach by rotating the shoulder girdle closer to the wall. The right leg trails as a counterbalance flag, preventing barn-door rotation. The compress → drive → extend pattern is executed with control and precision.</p>
+          <div class="tech-tags">
+            <span class="tech-tag strength">Leg drive from high-step</span>
+            <span class="tech-tag strength">Twist-lock reach extension</span>
+            <span class="tech-tag strength">Controlled, not lunging</span>
+            <span class="tech-tag improve">Full leg extension possible</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 5: Frames 9-10 -->
+      <div class="analysis-card">
+        <img src="giselle-frames/frame_08.jpg" alt="Establishing">
+        <div class="analysis-content">
+          <div class="phase-label">Phase 5 — Consolidation</div>
+          <h3><span class="num">9</span> Establishing the New Position</h3>
+          <p>Four-point stable contact achieved high on the wall. Both hands on the upper hold cluster at head-to-shoulder height, both feet on holds with intentional edging. Weight distribution is relatively even between both feet, with the left (higher) foot carrying slightly more load.</p>
+          <p>Feet are well-positioned relative to hips — not dangling, keeping the majority of weight on the larger, more fatigue-resistant leg muscles. Torso is close to the wall surface, which is critical as the wall angle may increase here.</p>
+          <div class="tech-tags">
+            <span class="tech-tag strength">Four-point stability</span>
+            <span class="tech-tag strength">Feet high, arms rested</span>
+            <span class="tech-tag strength">Body close to wall</span>
+            <span class="tech-tag">Rest/shake-out window</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <img src="giselle-frames/frame_09.jpg" alt="Final position">
+        <div class="analysis-content">
+          <div class="phase-label">Phase 5 — Consolidation</div>
+          <h3><span class="num">10</span> Ready for the Top</h3>
+          <p>Giselle is at the highest point of the captured sequence, firmly established above all crux sections. Active foot placement on both holds — deliberately edging and toeing rather than passively resting. Head position suggests route-reading the final moves.</p>
+          <p>This is the ideal moment to shake out each hand individually while weighting the feet, plan the next 2–3 moves, and identify the optimal hand-foot sequence before committing to the send.</p>
+          <div class="tech-tags">
+            <span class="tech-tag strength">Active foot engagement</span>
+            <span class="tech-tag strength">Controlled positioning</span>
+            <span class="tech-tag">Planning the topout</span>
+            <span class="tech-tag">Shake-out opportunity</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Summary Panels -->
+    <div class="section-header">
+      <h2>📊 Performance Summary</h2>
+      <p>Key strengths to reinforce and targeted areas for growth</p>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-panel strengths">
+        <h3>💪 Strengths</h3>
+        <ul>
+          <li><strong>Leg-driven movement:</strong> Giselle consistently generates propulsion from leg extension rather than arm pulling — the hallmark of energy-efficient climbing. Quads and glutes do the heavy lifting while arms guide and stabilise.</li>
+          <li><strong>High-step execution:</strong> The crux high-step (Frame 7→8) shows impressive hip flexibility, quad strength, and the discipline to compress fully before extending. She commits to the position without hesitation.</li>
+          <li><strong>Hip turn awareness:</strong> Multiple frames show deliberate twist-lock technique to extend reach on the driving side. This is an intermediate-to-advanced skill executed naturally.</li>
+          <li><strong>Toe precision:</strong> Across all 10 frames, foot placements are intentional and toe-first — no sloppy flat-footing. This maximises hold contact and enables more powerful pushes.</li>
+          <li><strong>Volume confidence:</strong> Standing balanced on the 3D sculpted volume shows spatial awareness and ankle stability. She treats volumes as opportunities, not obstacles.</li>
+          <li><strong>Progressive foot tracking:</strong> Feet consistently move upward with the hands, maintaining an efficient CoG rather than hanging stretched out on the arms.</li>
+        </ul>
+      </div>
+
+      <div class="summary-panel improvements">
+        <h3>🎯 Areas for Growth</h3>
+        <ul>
+          <li><strong>Straight-arm resting:</strong> In setup phases (Frames 1–2, 6), both arms are bent simultaneously. Hanging on straight arms (engaging the skeleton over musculature) during static moments would significantly reduce forearm pump.</li>
+          <li><strong>Complete leg extension:</strong> During drive phases, there's sometimes residual bend in the pushing leg at the moment of reach. Fully straightening the knee would maximise height gained per move — even 2–3 cm matters on hard problems.</li>
+          <li><strong>Hip-to-wall distance:</strong> In several frames (especially Frame 4), a small gap appears between hips and wall. Consciously pressing hips closer (pelvic tilt toward the wall) would reduce the lever-arm load on fingers.</li>
+          <li><strong>Deliberate flagging:</strong> The trailing-leg counterbalance is functional but could be more intentional. Sharper inside/outside flags would provide cleaner rotational control and smoother movement.</li>
+          <li><strong>Earlier hip rotation:</strong> Hip turns tend to begin mid-move rather than being initiated from the setup position. Starting the rotation earlier would make the drive phase more seamless.</li>
+          <li><strong>Route-reading in rest positions:</strong> Head orientation in stable stances suggests focus on the immediate hold rather than scanning 2–3 moves ahead. Anticipation unlocks smoother sequences.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Coaching Cues -->
+    <div class="section-header">
+      <h2>🗣️ Coaching Cues</h2>
+      <p>Specific, actionable phrases to use during training sessions</p>
+    </div>
+
+    <div class="coaching-section">
+      <div class="coaching-grid">
+
+        <div class="cue-card">
+          <div class="cue-icon">🦴</div>
+          <h4>Hang on Your Bones</h4>
+          <p>Before each move, check: "Am I hanging on muscle or skeleton?" If both arms are bent and you're not actively moving, straighten at least one arm completely. Let the elbow lock, shoulder engage passively, and your forearms recover.</p>
+          <div class="cue-phrase">"Long arms, heavy hips — let the skeleton do the holding."</div>
+        </div>
+
+        <div class="cue-card">
+          <div class="cue-icon">🔄</div>
+          <h4>Turn Before You Reach</h4>
+          <p>You already use hip turns beautifully (Frame 3 & 8) — now start them earlier. As you set your feet and load the drive leg, begin rotating the reaching-side hip into the wall <em>before</em> your hand leaves the hold. This pre-rotation makes the reach feel effortless.</p>
+          <div class="cue-phrase">"Hip turns in, hand goes up — in that order."</div>
+        </div>
+
+        <div class="cue-card">
+          <div class="cue-icon">🦵</div>
+          <h4>Finish the Push</h4>
+          <p>Your leg drive is already a major strength — take it to 100%. When driving upward, think about fully straightening the pushing leg before committing to the reach. That last 10% of knee extension is free height.</p>
+          <div class="cue-phrase">"Push until the knee is straight, then reach."</div>
+        </div>
+
+        <div class="cue-card">
+          <div class="cue-icon">🧲</div>
+          <h4>Hips Kiss the Wall</h4>
+          <p>After each move, do a quick hip check: is there space between your pelvis and the wall? If so, tilt your hips forward. Every centimetre closer reduces finger load exponentially. Think of your hips as magnets drawn to the wall surface.</p>
+          <div class="cue-phrase">"Close the gap — hips to the wall."</div>
+        </div>
+
+        <div class="cue-card">
+          <div class="cue-icon">🩰</div>
+          <h4>Flag with Intent</h4>
+          <p>You naturally trail the non-driving leg for balance — brilliant instinct. Now make it deliberate: choose inside flag (leg crosses behind the standing leg) or outside flag (leg extends to the same side) based on the rotation you need. A purposeful flag transforms balance from reactive to proactive.</p>
+          <div class="cue-phrase">"Place the flag like you place your feet — on purpose."</div>
+        </div>
+
+        <div class="cue-card">
+          <div class="cue-icon">👁️</div>
+          <h4>Eyes Up, Two Moves Ahead</h4>
+          <p>In your rest positions (Frames 5, 9, 10), you have perfect stability for route-reading. Use these moments to look past the next hold and identify the hold <em>after</em> that. Knowing where you're going after the next move lets you set up body position in advance.</p>
+          <div class="cue-phrase">"Where am I going? No — where am I going after that?"</div>
+        </div>
+
+        <div class="cue-card">
+          <div class="cue-icon">🫁</div>
+          <h4>Exhale on the Drive</h4>
+          <p>Pair your breathing with your movement phases: inhale during compression and setup, exhale sharply through the drive phase (when the legs push). This stabilises the core, increases power output, and prevents breath-holding which accelerates pump.</p>
+          <div class="cue-phrase">"Breathe in to load, breathe out to explode."</div>
+        </div>
+
+        <div class="cue-card">
+          <div class="cue-icon">⭐</div>
+          <h4>Trust Your High-Steps</h4>
+          <p>Your high-step technique is genuinely impressive — the flexibility, commitment, and drive-through are all there. Keep pushing the height of your high-steps in training. You clearly have the hip mobility; now build the confidence to use it on harder problems where the consequence feels bigger.</p>
+          <div class="cue-phrase">"You've got the flexibility — commit to it every time."</div>
+        </div>
+
+        <div class="cue-card">
+          <div class="cue-icon">🏔️</div>
+          <h4>The Big Picture</h4>
+          <p>Giselle's climbing shows a strong foundation of <strong>movement quality over brute strength</strong>. The leg-first approach, natural hip turns, and precise footwork are exactly what coaches look for. The improvements are refinements, not rebuilds — she's building on solid technique, not fixing broken habits.</p>
+          <div class="cue-phrase">"You climb smart. Now let's make smart even smoother."</div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <p>Analysis generated on 19 February 2026 · Frames extracted via FFmpeg · Biomechanical review by Claude Opus</p>
+  </footer>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="Enlarged frame">
+  </div>
+
+  <script>
+    function openLightbox(card) {
+      const src = card.querySelector('img').src;
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox').classList.add('active');
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+  </script>
+
+</body>
+</html>
