@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Climbing Biomechanical Analysis</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --accent: #6c63ff;
+    --accent2: #00d2ff;
+    --good: #00e676;
+    --warn: #ffab00;
+    --bad: #ff5252;
+    --text: #e0e0e0;
+    --muted: #8a8fa0;
+    --border: #2a2d3a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .hero {
+    background: linear-gradient(135deg, #1a1d27 0%, #0f1117 50%, #1a1230 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 2rem 2rem;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: .5rem;
+  }
+  .hero .subtitle { color: var(--muted); font-size: 1rem; }
+  .hero .meta {
+    display: flex; gap: 2rem; justify-content: center;
+    margin-top: 1.2rem; flex-wrap: wrap;
+  }
+  .hero .meta span {
+    background: var(--card); border: 1px solid var(--border);
+    padding: .4rem 1rem; border-radius: 20px; font-size: .85rem;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* Summary cards */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.2rem; margin-bottom: 2.5rem;
+  }
+  .summary-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.4rem;
+  }
+  .summary-card h3 {
+    font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); margin-bottom: .8rem;
+  }
+  .score-big {
+    font-size: 2.6rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .score-label { font-size: .85rem; color: var(--muted); }
+  .bar-track {
+    height: 6px; background: var(--border); border-radius: 3px;
+    margin: .5rem 0; overflow: hidden;
+  }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
+  .bar-fill.good { background: var(--good); }
+  .bar-fill.warn { background: var(--warn); }
+  .bar-fill.bad { background: var(--bad); }
+  .bar-fill.accent { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .bar-label { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); }
+
+  /* Strengths / improvements */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 2.5rem; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+  .list-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.4rem;
+  }
+  .list-card h2 { font-size: 1.1rem; margin-bottom: 1rem; }
+  .list-card ul { list-style: none; }
+  .list-card li {
+    padding: .7rem 0; border-bottom: 1px solid var(--border);
+    font-size: .92rem;
+  }
+  .list-card li:last-child { border-bottom: none; }
+  .list-card li strong { display: block; margin-bottom: .2rem; }
+  .tag-good, .tag-warn {
+    display: inline-block; font-size: .7rem; font-weight: 700;
+    padding: .15rem .5rem; border-radius: 10px; margin-right: .3rem;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .tag-good { background: rgba(0,230,118,.15); color: var(--good); }
+  .tag-warn { background: rgba(255,171,0,.15); color: var(--warn); }
+
+  /* Drills */
+  .drills {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.6rem; margin-bottom: 2.5rem;
+  }
+  .drills h2 { font-size: 1.2rem; margin-bottom: 1rem; }
+  .drill-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+  .drill {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.1rem;
+  }
+  .drill h4 { color: var(--accent2); margin-bottom: .4rem; font-size: .95rem; }
+  .drill p { font-size: .85rem; color: var(--muted); }
+
+  /* Frame section */
+  section.frames h2 {
+    font-size: 1.4rem; font-weight: 700; margin-bottom: 1.5rem;
+    padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+  }
+  .frame-card {
+    display: grid; grid-template-columns: 300px 1fr;
+    gap: 1.5rem; background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.4rem; margin-bottom: 1.4rem;
+    transition: border-color .2s;
+  }
+  .frame-card:hover { border-color: var(--accent); }
+  @media (max-width: 750px) { .frame-card { grid-template-columns: 1fr; } }
+  .frame-card img {
+    width: 100%; border-radius: 10px; object-fit: cover;
+    aspect-ratio: 9/16; background: #000;
+  }
+  .frame-detail h3 {
+    font-size: 1.1rem; margin-bottom: .2rem;
+  }
+  .frame-detail .phase {
+    display: inline-block; font-size: .72rem; text-transform: uppercase;
+    letter-spacing: .06em; padding: .2rem .6rem; border-radius: 10px;
+    background: rgba(108,99,255,.2); color: var(--accent); font-weight: 600;
+    margin-bottom: .8rem;
+  }
+  .frame-detail .rating {
+    float: right; font-size: 1.6rem; font-weight: 800;
+  }
+  .rating.high { color: var(--good); }
+  .rating.mid { color: var(--warn); }
+  .rating.low { color: var(--bad); }
+  .metric { margin-bottom: .6rem; }
+  .metric-label {
+    font-size: .75rem; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); margin-bottom: .15rem;
+  }
+  .metric-value { font-size: .88rem; }
+
+  footer {
+    text-align: center; padding: 2rem; color: var(--muted); font-size: .8rem;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== HERO ==================== -->
+<header class="hero">
+  <h1>🧗 Climbing Biomechanical Review</h1>
+  <p class="subtitle">10-frame technical analysis — indoor bouldering session</p>
+  <div class="meta">
+    <span>📅 19 Feb 2026</span>
+    <span>⏱ 16.3 s · 488 frames · 30 fps</span>
+    <span>📐 480 × 848 (portrait)</span>
+    <span>📷 Top-down / behind angle</span>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ==================== EXECUTIVE SUMMARY ==================== -->
+<div class="summary-grid">
+  <div class="summary-card" style="text-align:center;">
+    <h3>Overall Technique Score</h3>
+    <div class="score-big">6.0</div>
+    <div class="score-label">/ 10 — Intermediate</div>
+  </div>
+  <div class="summary-card">
+    <h3>Key Metric Breakdown</h3>
+    <div class="bar-label"><span>Arm Efficiency</span><span>55%</span></div>
+    <div class="bar-track"><div class="bar-fill warn" style="width:55%"></div></div>
+    <div class="bar-label"><span>Hip Rotation</span><span>35%</span></div>
+    <div class="bar-track"><div class="bar-fill bad" style="width:35%"></div></div>
+    <div class="bar-label"><span>Flagging</span><span>25%</span></div>
+    <div class="bar-track"><div class="bar-fill bad" style="width:25%"></div></div>
+    <div class="bar-label"><span>Body Tension</span><span>75%</span></div>
+    <div class="bar-track"><div class="bar-fill good" style="width:75%"></div></div>
+    <div class="bar-label"><span>Footwork Precision</span><span>40%</span></div>
+    <div class="bar-track"><div class="bar-fill warn" style="width:40%"></div></div>
+  </div>
+  <div class="summary-card">
+    <h3>Climbing Style Profile</h3>
+    <p style="font-size:.9rem;margin-bottom:.6rem;">
+      <strong>Power-dominant</strong> — the climber relies heavily on upper-body strength and deep lock-offs rather than efficient hip rotation and skeletal hanging. Moves are executed with adequate body tension but without the energy-saving techniques that distinguish intermediate from advanced climbing.
+    </p>
+    <p style="font-size:.85rem;color:var(--muted);">
+      Route: Leftward-upward traverse on slightly overhanging wall with pink volumes and bolt-on holds.
+    </p>
+  </div>
+</div>
+
+<!-- ==================== STRENGTHS / IMPROVEMENTS ==================== -->
+<div class="two-col">
+  <div class="list-card">
+    <h2>✅ Top 3 Strengths</h2>
+    <ul>
+      <li>
+        <strong><span class="tag-good">Strength</span> Excellent Body Tension</strong>
+        Core engagement is consistently maintained throughout the sequence. No visible hip sag even on the overhanging sections. The body line remains taut from feet to hands during full-extension reaches (frames 5, 9). This is a genuine asset — it indicates solid core strength that will transfer well as technique improves.
+      </li>
+      <li>
+        <strong><span class="tag-good">Strength</span> Committed Full-Extension Reaches</strong>
+        When reaching for the next hold, the climbing arm achieves near-full extension (170–180° elbow angle, frames 5 &amp; 9). This maximises reach distance and shows confidence in committing to moves rather than tentatively "patting" at holds.
+      </li>
+      <li>
+        <strong><span class="tag-good">Strength</span> Stable Weight Transfers</strong>
+        Transitions between positions are controlled — no visible barn-dooring, swinging, or cutting feet. The climber maintains contact and moves deliberately through each sequence. The top-out attempt (frame 9) shows excellent commitment with both arms extended.
+      </li>
+    </ul>
+  </div>
+  <div class="list-card">
+    <h2>⚠️ Top 3 Areas for Improvement</h2>
+    <ul>
+      <li>
+        <strong><span class="tag-warn">Priority 1</span> Hip Rotation — Turn In!</strong>
+        Hips stay square to the wall for 70%+ of the sequence. Before every reach, the same-side hip should twist into the wall. <em>Cue: "Kiss the wall with your hip before you reach."</em> This alone would add 5–10 cm of reach and cut lock-off strain in half.
+      </li>
+      <li>
+        <strong><span class="tag-warn">Priority 2</span> Excessive Lock-Off Depth</strong>
+        The anchor arm consistently bends to 90–110° during reaches (frames 4, 5, 8). This drains bicep endurance rapidly. <em>Cue: "Push down on the hold, don't pull up to it. Keep the anchor arm as straight as possible and use hip rotation to close the distance."</em>
+      </li>
+      <li>
+        <strong><span class="tag-warn">Priority 3</span> Absent / Underdeveloped Flagging</strong>
+        Only embryonic outside flags were observed (frames 5, 8) and never an inside flag. On overhanging terrain, intentional flagging prevents barn-dooring and reduces arm load. <em>Cue: "When reaching left, press the right toe into the wall behind your left foot (inside flag) or out to the right (outside flag) — it's a free third point of contact."</em>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- ==================== DRILLS ==================== -->
+<div class="drills">
+  <h2>🎯 Recommended Drills</h2>
+  <div class="drill-grid">
+    <div class="drill">
+      <h4>1. Twist-Lock Drill</h4>
+      <p>On easy terrain (2–3 grades below project), climb every move with an exaggerated hip turn. Left hand reaches → right hip to wall. Right hand reaches → left hip to wall. Do 4 × easy boulder problems. Focus: ingraining the hip turn as default movement pattern.</p>
+    </div>
+    <div class="drill">
+      <h4>2. Straight-Arm Traversing</h4>
+      <p>Traverse a long wall section with a strict rule: arms must stay straight at all times. All movement comes from feet and hips. If an arm bends, restart. 3 × 20 moves. Focus: learning to generate movement from the lower body.</p>
+    </div>
+    <div class="drill">
+      <h4>3. Silent Feet</h4>
+      <p>Climb any route with the rule that your feet must make zero noise on contact. Every placement is deliberate, precise, toe-first. Partner listens and calls out any audible footfall. 4 × routes. Focus: precision placement and awareness.</p>
+    </div>
+    <div class="drill">
+      <h4>4. Flag-Every-Move</h4>
+      <p>On easy terrain, every single hand move must include a flag (alternate inside and outside). Even if balance doesn't require it, flag anyway. 3 × problems. Focus: building flagging into the movement vocabulary so it becomes automatic.</p>
+    </div>
+    <div class="drill">
+      <h4>5. Hover Drill</h4>
+      <p>Before grabbing a hold, hover your hand 2 cm from it for a 2-second pause. This forces you to be fully stable (hips turned, feet weighted, core engaged) before committing. 3 × problems. Focus: eliminating lunging and building positional awareness.</p>
+    </div>
+    <div class="drill">
+      <h4>6. 4×4 Endurance Sets</h4>
+      <p>Pick 4 boulder problems at flash grade. Climb all 4 back-to-back with no rest between. Rest 4 min. Repeat 4 sets. Focus: maintaining technique under pump — the lock-off habit will worsen when tired, so practice staying efficient.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FRAME-BY-FRAME ==================== -->
+<section class="frames">
+  <h2>📸 Frame-by-Frame Breakdown</h2>
+
+  <!-- Frame 1 -->
+  <div class="frame-card">
+    <img src="climb-frames/frame_01.jpg" alt="Frame 1">
+    <div class="frame-detail">
+      <h3>Frame 1 — 0.0 s <span class="rating mid">6.0</span></h3>
+      <span class="phase">Setup / Stabilisation</span>
+      <div class="metric">
+        <div class="metric-label">Arms</div>
+        <div class="metric-value">Left arm nearly straight (~160–170°) — good energy conservation. Right arm moderately bent (~130–140°), acting as stabiliser. The straight left arm is the positive here.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Hip Rotation</div>
+        <div class="metric-value">Hips square to wall — no rotation detected. Minimal gap between torso and wall. This is a missed opportunity: even in a static setup, pre-rotating the hip for the next move saves transition time.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Flagging</div>
+        <div class="metric-value">None. Legs symmetrically positioned beneath the body.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Footwork</div>
+        <div class="metric-value">Both feet on large pink volume surfaces. Broad, stable base but imprecise — flat-footing on volumes rather than toe-hooking small edges. Prioritising stability over precision.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Centre of Gravity &amp; Tension</div>
+        <div class="metric-value">CoG centred between four contact points — stable quadrilateral base. Core engaged, no visible sag. Torso straight from top-down view.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frame 2 -->
+  <div class="frame-card">
+    <img src="climb-frames/frame_02.jpg" alt="Frame 2">
+    <div class="frame-detail">
+      <h3>Frame 2 — 1.8 s <span class="rating mid">5.5</span></h3>
+      <span class="phase">Weight Transfer</span>
+      <div class="metric">
+        <div class="metric-label">Arms</div>
+        <div class="metric-value">Left arm ~155–165° (good extension). Right arm ~120–135° — more bent than frame 1, consuming bicep energy. The bent-arm pattern on the right side is establishing itself as a habit.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Hip Rotation</div>
+        <div class="metric-value">Still square. Slight leftward body shift suggests upcoming weight transfer, but no hip turn accompanies it. <strong>Coaching cue:</strong> "Initiate the shift from the hip, not the shoulder."</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Flagging</div>
+        <div class="metric-value">None. Symmetrical leg positioning maintained.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Footwork</div>
+        <div class="metric-value">Stance slightly narrower than frame 1 — possible preparation for foot move. Still flat-footing on volumes.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Centre of Gravity &amp; Tension</div>
+        <div class="metric-value">CoG shifting leftward. Core engaged — body rigid with no lateral sag. Compact posture maintained through transition.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frame 3 -->
+  <div class="frame-card">
+    <img src="climb-frames/frame_03.jpg" alt="Frame 3">
+    <div class="frame-detail">
+      <h3>Frame 3 — 3.6 s <span class="rating mid">5.5</span></h3>
+      <span class="phase">Setup for Next Move</span>
+      <div class="metric">
+        <div class="metric-label">Arms</div>
+        <div class="metric-value">Left arm ~155–170° (extended, good). Right arm has dropped to ~110–125° — actively pulling to maintain position. The right arm is consistently the "puller" — this asymmetry may indicate a strength or habit imbalance.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Hip Rotation</div>
+        <div class="metric-value">Very subtle left-hip hint beginning — but minimal. Body shifted further left and upward. Square orientation persists.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Flagging</div>
+        <div class="metric-value">None observed. Legs close together.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Footwork</div>
+        <div class="metric-value">Feet obscured by body from overhead angle. Appear to remain on volume features. No evidence of precise small-foothold placement.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Centre of Gravity &amp; Tension</div>
+        <div class="metric-value">CoG continues leftward-upward migration. Compressed body position. Core maintaining integrity — no sag.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frame 4 -->
+  <div class="frame-card">
+    <img src="climb-frames/frame_04.jpg" alt="Frame 4">
+    <div class="frame-detail">
+      <h3>Frame 4 — 5.4 s <span class="rating mid">6.0</span></h3>
+      <span class="phase">Active Reach</span>
+      <div class="metric">
+        <div class="metric-label">Arms</div>
+        <div class="metric-value">Left arm reaching high at ~165–175° — excellent extension, textbook reaching form. Right arm locked off at ~100–120° — deeper than ideal, heavily taxing the bicep. This lock-off depth is the biggest energy drain in the sequence.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Hip Rotation</div>
+        <div class="metric-value">First meaningful hip rotation detected: left hip turning toward wall. Body shows slight diagonal from above. Improvement over frames 1–3, but still not a full twist-lock. <strong>Coaching cue:</strong> "Drive the rotation further — your belly button should face the anchor hand."</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Flagging</div>
+        <div class="metric-value">Embryonic outside flag on right leg — trailing slightly to the right. Not pronounced enough to be fully effective as a counterbalance, but the instinct is there.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Footwork</div>
+        <div class="metric-value">Right foot pressing on volume edge. Left foot partially obscured. One foot may have moved to a smaller hold — first sign of foot progression.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Centre of Gravity &amp; Tension</div>
+        <div class="metric-value">CoG shifted noticeably left and up. Extended reach means CoG likely at edge of base of support. Right arm lock-off + feet counterbalance. Body tension is solid — torso rigid.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frame 5 -->
+  <div class="frame-card">
+    <img src="climb-frames/frame_05.jpg" alt="Frame 5">
+    <div class="frame-detail">
+      <h3>Frame 5 — 7.2 s <span class="rating mid">6.5</span></h3>
+      <span class="phase">Full Extension / High Point</span>
+      <div class="metric">
+        <div class="metric-label">Arms</div>
+        <div class="metric-value">Left arm at maximum extension (~170–180°) — excellent, textbook reach. Right arm in deep lock-off (~90–110°), the most energy-expensive position. This is peak arm-load in the sequence.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Hip Rotation</div>
+        <div class="metric-value">Best hip rotation so far — left hip visibly turned in, body showing diagonal twist. Still not a full twist-lock but a clear improvement. More rotation here would reduce the lock-off depth by 3–5 cm of "free" reach.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Flagging</div>
+        <div class="metric-value">Right leg trailing/flagging outside to the right — providing counterbalance to leftward reach. This is a positive development. The flag could be more intentional and extended for greater effect.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Footwork</div>
+        <div class="metric-value">Left foot is primary weight-bearer. Right foot off to the side in flag position. Long lever arm from feet to reaching hand.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Centre of Gravity &amp; Tension</div>
+        <div class="metric-value">CoG shifted far left and up — at the edge of the base of support. Trailing right leg provides essential rotational balance. Excellent body tension: taut line from feet through torso to reaching hand.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frame 6 -->
+  <div class="frame-card">
+    <img src="climb-frames/frame_06.jpg" alt="Frame 6">
+    <div class="frame-detail">
+      <h3>Frame 6 — 9.0 s <span class="rating mid">6.0</span></h3>
+      <span class="phase">Hold Acquisition</span>
+      <div class="metric">
+        <div class="metric-label">Arms</div>
+        <div class="metric-value">Left arm made contact with target, still relatively extended (~150–165°). Right arm transitioning from lock-off to stabiliser (~100–120°). Good that the reach succeeded, but the right arm stays bent.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Hip Rotation</div>
+        <div class="metric-value">Returning to square orientation now that both hands are on holds. This is a common intermediate habit — losing the twist as soon as you latch. <strong>Coaching cue:</strong> "Stay twisted until your feet are repositioned."</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Flagging</div>
+        <div class="metric-value">Diminishing. Legs returning to symmetrical positioning.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Footwork</div>
+        <div class="metric-value">Wider stance re-established on volumes. Flat-footing returns. This would be the time to precisely re-set feet for the next move.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Centre of Gravity &amp; Tension</div>
+        <div class="metric-value">CoG re-centring between new hand positions. Broad base of support restored. Core still engaged, no sag.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frame 7 -->
+  <div class="frame-card">
+    <img src="climb-frames/frame_07.jpg" alt="Frame 7">
+    <div class="frame-detail">
+      <h3>Frame 7 — 10.8 s <span class="rating mid">5.5</span></h3>
+      <span class="phase">Match / Rest</span>
+      <div class="metric">
+        <div class="metric-label">Arms</div>
+        <div class="metric-value">Both arms moderately bent (~120–140°) reaching to the same height — likely matching on a hold. Both arms bent simultaneously is the least efficient static position. At least one arm should be straight to hang on skeleton.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Hip Rotation</div>
+        <div class="metric-value">Fully square. No rotation. Symmetrical body position from above. If this is a rest/match, hanging on one straight arm with a hip twist would save significantly more energy.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Flagging</div>
+        <div class="metric-value">None. Symmetrical foot placement.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Footwork</div>
+        <div class="metric-value">Wide stance on volume surfaces. Stable but imprecise. The matching position may be dictated by hold layout, but the feet could be better positioned for the next move.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Centre of Gravity &amp; Tension</div>
+        <div class="metric-value">CoG centred and stable. Compressed body position with both arms bent — "stacking" the body rather than hanging efficiently. Core engaged but unnecessary energy burn in this position.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frame 8 -->
+  <div class="frame-card">
+    <img src="climb-frames/frame_08.jpg" alt="Frame 8">
+    <div class="frame-detail">
+      <h3>Frame 8 — 12.6 s <span class="rating mid">6.0</span></h3>
+      <span class="phase">Active Reach (Repeat)</span>
+      <div class="metric">
+        <div class="metric-label">Arms</div>
+        <div class="metric-value">Left arm reaching at ~150–165°. Right arm locked off at ~90–110° — deep lock-off repeats. Consistent pattern: every left-hand reach involves the same right-arm over-bend. The anchor arm should be straighter.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Hip Rotation</div>
+        <div class="metric-value">Subtle left-hip-in rotation — similar to frames 4–5. Body shows slight diagonal. Present but insufficient to maximise efficiency. The rotation is reactive (happens during the reach) rather than proactive (initiated before the reach).</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Flagging</div>
+        <div class="metric-value">Right leg trailing slightly — mild counterbalance. Not a strong, intentional flag. The foot could be pressed more firmly into the wall for active balance.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Footwork</div>
+        <div class="metric-value">Primary weight on left foot. Right foot trailing. Feet appear to be on volume surfaces.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Centre of Gravity &amp; Tension</div>
+        <div class="metric-value">CoG shifted left and up. Narrower base of support. Good core tension — connected line from feet to hands, preventing swing on overhanging terrain.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frame 9 -->
+  <div class="frame-card">
+    <img src="climb-frames/frame_09.jpg" alt="Frame 9">
+    <div class="frame-detail">
+      <h3>Frame 9 — 14.4 s <span class="rating high">7.0</span></h3>
+      <span class="phase">Final Reach / Top-Out</span>
+      <div class="metric">
+        <div class="metric-label">Arms</div>
+        <div class="metric-value">Both arms extended overhead at ~155–175° — this is the best arm position in the entire sequence. First frame where both arms are near full extension simultaneously. Maximum reach achieved. Textbook top-out extension.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Hip Rotation</div>
+        <div class="metric-value">Hips facing wall directly, body elongated vertically. Straight, narrow profile from above. Hips close to wall. In a top-out, square hips are acceptable as the goal is vertical reach, not lateral efficiency.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Flagging</div>
+        <div class="metric-value">No flagging — body is fully elongated for vertical reach. Both feet below serving as base for extension. Appropriate for this movement phase.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Footwork</div>
+        <div class="metric-value">Feet on lower holds/volumes, providing base for maximum body extension. Long lever arm from feet to hands. Feet must be solid here — any slip is catastrophic.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Centre of Gravity &amp; Tension</div>
+        <div class="metric-value"><strong>Best body tension in the sequence.</strong> Body fully elongated and taut — core strongly engaged to maintain stretched position on overhanging wall. The line from toes to fingertips is one connected chain. High CoG between hip and chest, within base of support but with very long lever arm.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frame 10 -->
+  <div class="frame-card">
+    <img src="climb-frames/frame_10.jpg" alt="Frame 10">
+    <div class="frame-detail">
+      <h3>Frame 10 — 16.3 s <span class="rating mid">6.0</span></h3>
+      <span class="phase">Completion / Dismount</span>
+      <div class="metric">
+        <div class="metric-label">Arms</div>
+        <div class="metric-value">Final position — arms appear to be in a terminal hold position. The sequence concludes here after the top-out attempt from frame 9.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Hip Rotation</div>
+        <div class="metric-value">Terminal frame — hip position reflects the completion state of the climb.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Flagging</div>
+        <div class="metric-value">N/A — completion phase.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Footwork</div>
+        <div class="metric-value">Final foot position at sequence end.</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Centre of Gravity &amp; Tension</div>
+        <div class="metric-value">The climber has completed the sequence. Body tension and CoG reflect the dismount/finish position.</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ==================== COACHING SUMMARY ==================== -->
+<div class="drills" style="border-left: 3px solid var(--accent);">
+  <h2>📋 Coaching Summary — One-Paragraph Takeaway</h2>
+  <p style="font-size:.95rem;line-height:1.8;">
+    You're climbing with <strong>solid body tension and committed reaches</strong> — these are genuine strengths that many climbers struggle to develop. Your core stays engaged even at full extension on overhanging terrain, and you don't hesitate when going for holds. The single biggest upgrade available to you right now is <strong>hip rotation</strong>: turning the same-side hip into the wall before every reach. This one change will give you free reach (5–10 cm), slash your lock-off demand (your right bicep is doing double duty because your hips stay square), and make flagging feel natural rather than forced. Spend 4 weeks doing the twist-lock drill and straight-arm traversing on easy terrain, and you'll see a grade jump. Your footwork on volumes is adequate but generic — start consciously placing toes on edges rather than standing flat, even when volumes tempt you to be lazy. The technique is there in flashes (frames 5, 9) — the goal is making it your default, not your exception.
+  </p>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  Biomechanical analysis generated 19 Feb 2026 · 10-frame extraction via ffmpeg · Analysis by Claude
+</footer>
+
+</body>
+</html>
