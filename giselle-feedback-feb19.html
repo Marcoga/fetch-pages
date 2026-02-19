@@ -3,83 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giselle's Climbing Feedback | Fetch</title>
+    <title>Giselle's Climbing Review | Feb 19, 2026</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        :root {
-            --bg: #0a0a0a;
-            --card-bg: #111;
-            --accent: #fbbf24;
-            --text: #eee;
-            --muted: #888;
-            --border: #222;
+        :root { --bg: #0a0a0a; --card: #141414; --accent: #fbbf24; --text: #f5f5f5; --muted: #a3a3a3; --border: #262626; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); max-width: 900px; margin: 0 auto; padding: 2rem; }
+        h1 { color: var(--accent); margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
+        .session-grid { display: flex; flex-direction: column; gap: 3rem; }
+        .climb-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; position: relative; }
+        .climb-header { padding: 1.5rem; border-bottom: 1px solid var(--border); background: rgba(251, 191, 36, 0.05); }
+        .climb-header h2 { margin: 0; font-size: 1.4rem; color: var(--accent); }
+        .climb-content { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; padding: 1.5rem; }
+        @media (max-width: 700px) { .climb-content { grid-template-columns: 1fr; } }
+        .gif-container { position: relative; width: 320px; }
+        .climb-gif { width: 100%; border-radius: 12px; border: 1px solid var(--border); }
+        .overlay-text { 
+            position: absolute; top: 20px; left: 10px; right: 10px; 
+            background: rgba(0,0,0,0.7); color: #fff; padding: 8px; 
+            border-radius: 4px; font-size: 0.85rem; font-weight: bold; 
+            text-align: center; border: 1px solid var(--accent);
+            animation: fadeOut 4s forwards;
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 2rem; max-width: 800px; margin: 0 auto; }
-        h1 { color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 2rem; }
-        .section { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
-        .highlight { color: var(--accent); font-weight: bold; }
-        .tip-box { background: rgba(251, 191, 36, 0.1); border-left: 4px solid var(--accent); padding: 1rem; margin: 1rem 0; }
-        ul { padding-left: 1.5rem; }
-        li { margin-bottom: 0.5rem; }
-        .footer { text-align: center; color: var(--muted); font-size: 0.9rem; margin-top: 3rem; }
+        @keyframes fadeOut { 0% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        .feedback-section h3 { font-size: 1.1rem; color: var(--text); margin-bottom: 0.5rem; }
+        .feedback-text { font-size: 0.95rem; color: var(--muted); line-height: 1.6; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-bottom: 1rem; text-transform: uppercase; }
+        .tag.success { background: #22c55e; color: #000; }
+        .tag.fail { background: #ef4444; color: #fff; }
+        .homework { background: rgba(56, 189, 248, 0.1); border-left: 4px solid #38bdf8; padding: 1rem; margin-top: 1rem; border-radius: 0 8px 8px 0; }
+        .homework b { color: #38bdf8; }
     </style>
 </head>
 <body>
-    <h1>🧗‍♀️ Giselle's Technique Review</h1>
-    <p>February 19, 2026 — Analysis of your latest sessions.</p>
+    <h1>🧗‍♀️ Giselle's Session Review: Feb 19, 2026</h1>
+    <p>A deep dive into your technique across your top attempts today.</p>
 
-    <div class="section" style="border: 2px solid var(--accent); background: rgba(251, 191, 36, 0.05);">
-        <h2>🏆 THE BIG SEND: Yellow Route Victory!</h2>
-        <p>You absolutely nailed this one. Here's why you were successful this time:</p>
-        <ul>
-            <li><strong>Decisive Commitment:</strong> At the top, you didn't hesitate. You pushed through your legs and extended fully to the finish. </li>
-            <li><strong>Wide Base:</strong> You used a wide, stable leg stance to keep your center of gravity under control on the crescent holds.</li>
-            <li><strong>Arm Management:</strong> You used better extension on your reaches, saving enough "fuel" in your forearms to finish strong.</li>
-        </ul>
-        <p class="highlight" style="font-size: 1.2rem; text-align: center;">✅ YELLOW ROUTE CRUSHED!</p>
-    </div>
+    <div class="session-grid">
+        <!-- Success: Yellow Route -->
+        <div class="climb-card">
+            <div class="climb-header">
+                <span class="tag success">Victory!</span>
+                <h2>1. The Yellow Route Send</h2>
+            </div>
+            <div class="climb-content">
+                <div class="gif-container">
+                    <img src="assets/giselle-gifs/g5_victory.gif" class="climb-gif" alt="Yellow Send">
+                    <div class="overlay-text">Perfect commitment at the top!</div>
+                </div>
+                <div class="feedback-section">
+                    <h3>Analysis</h3>
+                    <p class="feedback-text">This was your standout performance. You stayed calm on the crescents and used <b>better arm extension</b> on your reaches, which saved fuel for the finish.</p>
+                    <div class="homework"><b>Key Takeaway:</b> Notice how decisive you were at the top. Pushing through your legs made the difference.</div>
+                </div>
+            </div>
+        </div>
 
-    <div class="section">
-        <h2>⚖️ Lateral Movement & Balance</h2>
-        <p>In your climb on the tall wall, you moved across approximately 5 feet horizontally while gaining height. This is excellent! Moving laterally while ascending is a key intermediate skill.</p>
-        <div class="tip-box">
-            <strong>Observation:</strong> You used a large blue volume as a foothold—this shows growing confidence and trust in your balance. Great work!
+        <!-- High Step Strength -->
+        <div class="climb-card">
+            <div class="climb-header">
+                <span class="tag success">Strength Highlight</span>
+                <h2>2. The White Route High-Step</h2>
+            </div>
+            <div class="climb-content">
+                <div class="gif-container">
+                    <img src="assets/giselle-gifs/g3_highstep.gif" class="climb-gif" alt="High Step">
+                    <div class="overlay-text">Textbook High-Step onto Volume</div>
+                </div>
+                <div class="feedback-section">
+                    <h3>Analysis</h3>
+                    <p class="feedback-text">Your <b>leg commitment</b> here was incredible. Many climbers are afraid to put their feet that high, but you trusted your balance and drove upward with power.</p>
+                    <div class="homework"><b>Key Takeaway:</b> This is your superpower! Always look for high-feet options to take the weight off your arms.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lateral Balance -->
+        <div class="climb-card">
+            <div class="climb-header">
+                <span class="tag success">Balance Check</span>
+                <h2>3. Tall Wall Lateral Traverse</h2>
+            </div>
+            <div class="climb-content">
+                <div class="gif-container">
+                    <img src="assets/giselle-gifs/g6_lateral.gif" class="climb-gif" alt="Lateral">
+                    <div class="overlay-text">Watch the Blue Volume foothold</div>
+                </div>
+                <div class="feedback-section">
+                    <h3>Analysis</h3>
+                    <p class="feedback-text">Covering horizontal distance while gaining height is tough, but you handled it with great <b>coordination</b>. Trusting the blue volume as a foothold was a pro move.</p>
+                    <div class="homework"><b>Key Takeaway:</b> Keep your "belly button to the wall" when moving sideways to stay balanced.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flow Check -->
+        <div class="climb-card">
+            <div class="climb-header">
+                <span class="tag success">Flow Improvement</span>
+                <h2>4. Grey Wall Technique</h2>
+            </div>
+            <div class="climb-content">
+                <div class="gif-container">
+                    <img src="assets/giselle-gifs/g2_grey.gif" class="climb-gif" alt="Flow">
+                    <div class="overlay-text">Great continuous movement here</div>
+                </div>
+                <div class="feedback-section">
+                    <h3>Analysis</h3>
+                    <p class="feedback-text">No more "camping" on holds! You moved with <b>intent and confidence</b>. Your footwork on the smaller holds is becoming very precise.</p>
+                    <div class="homework"><b>Drill:</b> "Straight Arm" pauses. Between moves, try to let your arms go dead straight for just 1 second to rest.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fall Analysis -->
+        <div class="climb-card">
+            <div class="climb-header">
+                <span class="tag fail">Learning Moment</span>
+                <h2>5. Yellow Crescent Fall</h2>
+            </div>
+            <div class="climb-content">
+                <div class="gif-container">
+                    <img src="assets/giselle-gifs/g1_crescent.gif" class="climb-gif" alt="Fall">
+                    <div class="overlay-text">Watch the hips drift away</div>
+                </div>
+                <div class="feedback-section">
+                    <h3>Analysis</h3>
+                    <p class="feedback-text">The slopers (crescents) are tricky. In this attempt, your <b>hips sagged away</b> from the wall, which "peeled" your hands off the holds.</p>
+                    <div class="homework"><b>Strategy:</b> On slopers, the closer your hips are to the wall, the more friction you get. Think: "Glue the hips."</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="section">
-        <h2>✨ Top Strength: Leg Commitment</h2>
-        <p>In your climb on the white route, your <strong>high-step onto the volume</strong> was fantastic. A lot of climbers are afraid to put their feet that high, but you trusted your leg to drive the move. This is exactly how you save arm strength!</p>
-    </div>
-
-    <div class="section">
-        <h2>🛠️ Three Keys to Level Up</h2>
-        
-        <h3>1. 🦴 The "Straight Arm" Rest</h3>
-        <p>I noticed your arms stay slightly bent even when you're just pausing to look for the next hold. Every second with bent arms burns your forearm fuel.</p>
-        <div class="tip-box">
-            <strong>Homework:</strong> Next time you pause, consciously drop your weight into "long arms." Imagine you're hanging from a coat hanger. Let your skeleton do the work!
-        </div>
-
-        <h3>2. 🎯 Traverse Precision</h3>
-        <p>On the traverse (where you had that dynamic reach), the fall usually starts with the feet. If your foot isn't 100% "glued" to the best part of the hold before you jump, the move won't have direction.</p>
-        <ul>
-            <li>Look at the foot placement.</li>
-            <li>Place the toe tip precisely.</li>
-            <li>Weight it fully BEFORE reaching.</li>
-        </ul>
-
-        <h3>3. 🧘 Hips to the Wall</h3>
-        <p>Keeping your "belly button to the wall" prevents your feet from swinging out (cutting) during big moves. Think about keeping your center of gravity stacked over your feet at all times.</p>
-    </div>
-
-    <div class="section">
-        <h2>📉 Fall Analysis: The Traverse Dyno</h2>
-        <p>It looked like a <strong>loss of core tension</strong>. When your hand left the wall, your feet "cut" (swung away), which overloaded your catching hand. To fix this, squeeze your core and push harder through your toes during the jump!</p>
-    </div>
-
-    <div class="footer">
-        ⚡ <em>"The best climber is the one having the most fun."</em> — Fetch
-    </div>
+    <p style="text-align: center; margin-top: 4rem; color: var(--muted);">⚡ <em>"Every fall is just a lesson in physics."</em> — Fetch</p>
 </body>
 </html>
