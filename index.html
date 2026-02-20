@@ -92,7 +92,7 @@
         .session-header h2 { margin: 0; color: var(--accent); }
         .session-climber-tag { padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: bold; background: var(--border); }
         
-        .analysis-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .analysis-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
         .analysis-box { background: #0d1117; border: 1px solid var(--border); padding: 1.5rem; border-radius: 8px; }
         .analysis-box h3 { margin-top: 0; font-size: 1.1rem; color: var(--muted); }
         
@@ -101,6 +101,15 @@
         .btn-link:hover { border-color: var(--accent); }
         .btn-link.opus { color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
         .btn-link.fetch { background: rgba(251, 191, 36, 0.1); }
+
+        /* Session Highlights */
+        .highlights-section { border-top: 1px solid var(--border); padding-top: 1.5rem; }
+        .highlights-section h3 { margin-top: 0; font-size: 1.1rem; color: var(--muted); margin-bottom: 1rem; }
+        .highlight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+        .highlight-item { background: #000; aspect-ratio: 9/16; border-radius: 6px; border: 1px solid var(--border); overflow: hidden; position: relative; }
+        .highlight-item img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: 0.3s; }
+        .highlight-item:hover img { opacity: 1; transform: scale(1.05); }
+        .highlight-label { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); padding: 5px; font-size: 0.7rem; text-align: center; font-weight: bold; }
 
         .journal-links { text-align: center; margin-top: 3rem; }
         .journal-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; margin: 0 15px; }
@@ -169,6 +178,12 @@
                     <div id="view-giselle-links" class="link-grid">No analysis available.</div>
                 </div>
             </div>
+            
+            <!-- NEW HIGHLIGHTS SECTION -->
+            <div class="highlights-section" id="view-highlights-container" style="display:none;">
+                <h3>🎬 Session Highlights</h3>
+                <div class="highlight-grid" id="view-highlights"></div>
+            </div>
         </div>
 
         <div class="journal-links">
@@ -180,6 +195,16 @@
 
     <script>
         let sessionCache = {};
+        
+        // Manual override for known highlights until we automate this in the DB
+        const manualHighlights = {
+            '2026-02-19': [
+                { label: 'Marco: 6b Send', img: 'assets/climb-gifs/climb_1.gif' },
+                { label: 'Giselle: Yellow Send', img: 'assets/giselle-gifs/g5_victory.gif' },
+                { label: 'Marco: Vol Mastery', img: 'assets/climb-gifs/climb_4.gif' },
+                { label: 'Giselle: High Step', img: 'assets/giselle-gifs/g3_highstep.gif' }
+            ]
+        };
 
         function formatDate(isoString) {
             const [y, m, d] = isoString.split('-');
@@ -197,11 +222,14 @@
             const marcoCont = document.getElementById('view-marco-links');
             const giselleCont = document.getElementById('view-giselle-links');
             const climberTag = document.getElementById('view-climber');
+            const highlightsWrap = document.getElementById('view-highlights-container');
+            const highlightsGrid = document.getElementById('view-highlights');
 
             if (!session) {
                 marcoCont.innerHTML = '<a href="#" class="btn-link">Write Notes</a>';
                 giselleCont.innerHTML = '<a href="#" class="btn-link">Write Notes</a>';
                 climberTag.innerText = 'Rest Day';
+                highlightsWrap.style.display = 'none';
                 return;
             }
 
@@ -216,6 +244,20 @@
 
             marcoCont.innerHTML = buildLinks(marcoAnalyses);
             giselleCont.innerHTML = buildLinks(giselleAnalyses);
+
+            // Handle Highlights
+            const highlights = manualHighlights[dateStr];
+            if (highlights) {
+                highlightsWrap.style.display = 'block';
+                highlightsGrid.innerHTML = highlights.map(h => `
+                    <div class="highlight-item">
+                        <img src="${h.img}">
+                        <div class="highlight-label">${h.label}</div>
+                    </div>
+                `).join('');
+            } else {
+                highlightsWrap.style.display = 'none';
+            }
         }
 
         async function init() {
