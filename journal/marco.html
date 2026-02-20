@@ -42,6 +42,7 @@
         <div id="journal-content">Loading...</div>
     </div>
     <script>
+        const USER_NAME = 'Marco';
         const manualHighlights = {
             '2026-02-19': [
                 { label: '6b Send', img: '../assets/climb-gifs/climb_1.gif', type: 'marco' },
@@ -62,12 +63,10 @@
                 const res = await fetch('https://api.marcoga.com/api/sessions/notes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ date, notes })
+                    body: JSON.stringify({ date, notes, user: USER_NAME })
                 });
                 if (res.ok) {
                     btn.innerText = 'Saved!';
-                    // Update cache so immediate reload of data doesn't overwrite with old data
-                    // Or just let the page refresh handle it
                     setTimeout(() => btn.innerText = 'Save Notes', 2000);
                 } else {
                     btn.innerText = 'Error saving';
@@ -80,7 +79,7 @@
 
         async function load() {
             try {
-                const res = await fetch('https://api.marcoga.com/api/sessions');
+                const res = await fetch(`https://api.marcoga.com/api/sessions?user=${USER_NAME}`);
                 const data = await res.json();
                 const container = document.getElementById('journal-content');
                 container.innerHTML = '';
@@ -90,16 +89,14 @@
                     if (!sessionsByDate[row.date]) {
                         sessionsByDate[row.date] = { analyses: [], notes: row.notes || '', climber: row.climber };
                     }
-                    if (row.climber.includes('Marco')) {
-                        if (row.url && !row.url.includes('giselle')) {
-                            sessionsByDate[row.date].analyses.push({ model: row.model, url: '../' + row.url });
-                        }
+                    if (row.url && !row.url.includes('giselle')) {
+                        sessionsByDate[row.date].analyses.push({ model: row.model, url: '../' + row.url });
                     }
                 });
 
                 Object.keys(sessionsByDate).sort().reverse().forEach(date => {
                     const session = sessionsByDate[date];
-                    if (!session.climber.includes('Marco')) return;
+                    if (!session.climber.includes(USER_NAME)) return;
 
                     const analyses = session.analyses;
                     const highlights = (manualHighlights[date] || []).filter(h => h.type === 'marco');
@@ -114,7 +111,7 @@
                                 }
                             </div>
                             <div class="notes-section">
-                                <span class="notes-label">Session Notes</span>
+                                <span class="notes-label">Your Session Notes</span>
                                 <textarea id="notes-${date}" class="notes-area" placeholder="Add beta, how you felt, or specific sends...">${session.notes}</textarea>
                                 <button class="save-notes-btn" onclick="saveNotes('${date}', this)">Save Notes</button>
                             </div>

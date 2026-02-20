@@ -92,22 +92,21 @@
         .session-header h2 { margin: 0; color: var(--accent); }
         .session-climber-tag { padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: bold; background: var(--border); }
         
+        .notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+        .notes-box { background: #0d1117; border: 1px solid var(--border); padding: 1.2rem; border-radius: 8px; }
+        .notes-box h3 { margin-top: 0; font-size: 0.9rem; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+        .notes-text { font-size: 0.95rem; line-height: 1.5; color: var(--text); white-space: pre-wrap; }
+
         .analysis-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
         .analysis-box { background: #0d1117; border: 1px solid var(--border); padding: 1.5rem; border-radius: 8px; }
         .analysis-box h3 { margin-top: 0; font-size: 1.1rem; color: var(--muted); }
         
-        /* Session Notes Area */
-        .session-notes-box { background: #0d1117; border: 1px solid var(--border); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; }
-        .session-notes-box h3 { margin-top: 0; font-size: 1.1rem; color: var(--muted); margin-bottom: 10px; }
-        .session-notes-text { font-size: 0.95rem; line-height: 1.5; color: var(--text); white-space: pre-wrap; }
-
         .link-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1rem; }
         .btn-link { text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; transition: 0.2s; background: var(--border); color: var(--text); border: 1px solid transparent; }
         .btn-link:hover { border-color: var(--accent); }
         .btn-link.opus { color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
         .btn-link.fetch { background: rgba(251, 191, 36, 0.1); }
 
-        /* Session Highlights */
         .highlights-section { border-top: 1px solid var(--border); padding-top: 1.5rem; }
         .highlights-section h3 { margin-top: 0; font-size: 1.1rem; color: var(--muted); margin-bottom: 1rem; }
         .highlight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
@@ -125,7 +124,7 @@
     <div class="container">
         <header>
             <h1>⚡ Fetch Climbing Lab</h1>
-            <div style="color: var(--muted); font-size: 0.8rem;">Live Engine v2.5</div>
+            <div style="color: var(--muted); font-size: 0.8rem;">Live Engine v2.6</div>
         </header>
 
         <div class="stats-grid">
@@ -167,16 +166,21 @@
             <div class="legend-item"><div class="legend-box" style="background: var(--both-color)"></div> Team Session</div>
         </div>
 
-        <!-- Filtered Detail View -->
         <div class="focused-session" id="session-viewer">
             <div class="session-header">
                 <h2 id="view-date">Select a day</h2>
                 <span class="session-climber-tag" id="view-climber">--</span>
             </div>
 
-            <div class="session-notes-box" id="view-notes-container" style="display:none;">
-                <h3>📝 Session Notes</h3>
-                <div class="session-notes-text" id="view-notes"></div>
+            <div class="notes-grid">
+                <div class="notes-box" id="marco-notes-wrap" style="display:none;">
+                    <h3>Marco's Notes</h3>
+                    <div class="notes-text" id="view-marco-notes"></div>
+                </div>
+                <div class="notes-box" id="giselle-notes-wrap" style="display:none;">
+                    <h3>Giselle's Notes</h3>
+                    <div class="notes-text" id="view-giselle-notes"></div>
+                </div>
             </div>
 
             <div class="analysis-cards">
@@ -216,11 +220,24 @@
         };
 
         function formatDate(isoString) {
+            if (!isoString) return '--';
             const [y, m, d] = isoString.split('-');
             return `${d}.${m}.${y}`;
         }
 
-        function showSession(dateStr) {
+        async function fetchAllNotes(dateStr) {
+            const users = ['Marco', 'Giselle'];
+            const notes = {};
+            for (const user of users) {
+                const res = await fetch(`https://api.marcoga.com/api/sessions?user=${user}`);
+                const data = await res.json();
+                const session = data.find(s => s.date === dateStr);
+                notes[user] = session ? session.notes : null;
+            }
+            return notes;
+        }
+
+        async function showSession(dateStr) {
             const session = sessionCache[dateStr];
             document.getElementById('view-date').innerText = formatDate(dateStr);
             
@@ -231,30 +248,33 @@
             const marcoCont = document.getElementById('view-marco-links');
             const giselleCont = document.getElementById('view-giselle-links');
             const climberTag = document.getElementById('view-climber');
-            const notesWrap = document.getElementById('view-notes-container');
-            const notesText = document.getElementById('view-notes');
             const highlightsWrap = document.getElementById('view-highlights-container');
             const highlightsGrid = document.getElementById('view-highlights');
+
+            // Notes elements
+            const mNotesWrap = document.getElementById('marco-notes-wrap');
+            const gNotesWrap = document.getElementById('giselle-notes-wrap');
+            const mNotesText = document.getElementById('view-marco-notes');
+            const gNotesText = document.getElementById('view-giselle-notes');
+
+            const notes = await fetchAllNotes(dateStr);
+            
+            if (notes['Marco']) { mNotesWrap.style.display = 'block'; mNotesText.innerText = notes['Marco']; }
+            else { mNotesWrap.style.display = 'none'; }
+            
+            if (notes['Giselle']) { gNotesWrap.style.display = 'block'; gNotesText.innerText = notes['Giselle']; }
+            else { gNotesWrap.style.display = 'none'; }
 
             if (!session) {
                 marcoCont.innerHTML = '<a href="journal/marco.html" class="btn-link">Write Notes</a>';
                 giselleCont.innerHTML = '<a href="journal/giselle.html" class="btn-link">Write Notes</a>';
                 climberTag.innerText = 'Rest Day';
-                notesWrap.style.display = 'none';
                 highlightsWrap.style.display = 'none';
                 return;
             }
 
             climberTag.innerText = session.climber;
             
-            // Show Notes
-            if (session.notes && session.notes.trim() !== '') {
-                notesWrap.style.display = 'block';
-                notesText.innerText = session.notes;
-            } else {
-                notesWrap.style.display = 'none';
-            }
-
             const marcoAnalyses = session.analyses.filter(a => !a.url.includes('giselle'));
             const giselleAnalyses = session.analyses.filter(a => a.url.includes('giselle'));
 
@@ -286,7 +306,7 @@
                 
                 data.forEach(row => {
                     if (!sessionCache[row.date]) {
-                        sessionCache[row.date] = { date: row.date, climber: row.climber, notes: row.notes, analyses: [] };
+                        sessionCache[row.date] = { date: row.date, climber: row.climber, analyses: [] };
                     }
                     if (row.url) sessionCache[row.date].analyses.push({ model: row.model, url: row.url });
                 });

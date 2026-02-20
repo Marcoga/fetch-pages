@@ -41,11 +41,10 @@
         <div id="journal-content">Loading...</div>
     </div>
     <script>
+        const USER_NAME = 'Giselle';
         const manualHighlights = {
             '2026-02-19': [
-                { label: '6b Send', img: '../assets/climb-gifs/climb_1.gif', type: 'marco' },
                 { label: 'Yellow Send', img: '../assets/giselle-gifs/g5_victory.gif', type: 'giselle' },
-                { label: 'Vol Mastery', img: '../assets/climb-gifs/climb_4.gif', type: 'marco' },
                 { label: 'High Step', img: '../assets/giselle-gifs/g3_highstep.gif', type: 'giselle' }
             ]
         };
@@ -63,7 +62,7 @@
                 const res = await fetch('https://api.marcoga.com/api/sessions/notes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ date, notes })
+                    body: JSON.stringify({ date, notes, user: USER_NAME })
                 });
                 if (res.ok) {
                     btn.innerText = 'Saved!';
@@ -78,57 +77,62 @@
         }
 
         async function load() {
-            const res = await fetch('https://api.marcoga.com/api/sessions');
-            const data = await res.json();
-            const container = document.getElementById('journal-content');
-            container.innerHTML = '';
-            
-            const sessionsByDate = {};
-            data.forEach(row => {
-                if (!sessionsByDate[row.date]) {
-                    sessionsByDate[row.date] = { analyses: [], notes: row.notes || '', climber: row.climber };
-                }
-                if (row.climber.includes('Giselle')) {
-                    if (row.url && row.url.includes('giselle')) {
-                        sessionsByDate[row.date].analyses.push({ model: row.model, url: '../' + row.url });
-                    }
-                }
-            });
-
-            Object.keys(sessionsByDate).sort().reverse().forEach(date => {
-                const session = sessionsByDate[date];
-                if (!session.climber.includes('Giselle')) return;
-
-                const analyses = session.analyses;
-                const highlights = (manualHighlights[date] || []).filter(h => h.type === 'giselle');
+            try {
+                const res = await fetch(`https://api.marcoga.com/api/sessions?user=${USER_NAME}`);
+                const data = await res.json();
+                const container = document.getElementById('journal-content');
+                container.innerHTML = '';
                 
-                container.innerHTML += `
-                    <div class="session">
-                        <span class="date">${formatDate(date)}</span>
-                        <div class="links">
-                            ${analyses.length > 0 ? 
-                                analyses.map(a => `<a href="${a.url}" class="btn">${a.model.toUpperCase()} Review</a>`).join('') :
-                                '<span>No digital analysis.</span>'
-                            }
-                        </div>
-                        <div class="notes-section">
-                            <span class="notes-label">Session Notes</span>
-                            <textarea id="notes-${date}" class="notes-area" placeholder="Add beta, how you felt, or specific sends...">${session.notes}</textarea>
-                            <button class="save-notes-btn" onclick="saveNotes('${date}', this)">Save Notes</button>
-                        </div>
-                        ${highlights.length > 0 ? `
-                            <div class="highlights">
-                                ${highlights.map(h => `
-                                    <div class="highlight-item">
-                                        <img src="${h.img}">
-                                        <div class="highlight-label">${h.label}</div>
-                                    </div>
-                                `).join('')}
+                const sessionsByDate = {};
+                data.forEach(row => {
+                    if (!sessionsByDate[row.date]) {
+                        sessionsByDate[row.date] = { analyses: [], notes: row.notes || '', climber: row.climber };
+                    }
+                    if (row.climber.includes(USER_NAME)) {
+                        if (row.url && row.url.includes('giselle')) {
+                            sessionsByDate[row.date].analyses.push({ model: row.model, url: '../' + row.url });
+                        }
+                    }
+                });
+
+                Object.keys(sessionsByDate).sort().reverse().forEach(date => {
+                    const session = sessionsByDate[date];
+                    if (!session.climber.includes(USER_NAME)) return;
+
+                    const analyses = session.analyses;
+                    const highlights = (manualHighlights[date] || []).filter(h => h.type === 'giselle');
+                    
+                    container.innerHTML += `
+                        <div class="session">
+                            <span class="date">${formatDate(date)}</span>
+                            <div class="links">
+                                ${analyses.length > 0 ? 
+                                    analyses.map(a => `<a href="${a.url}" class="btn">${a.model.toUpperCase()} Review</a>`).join('') :
+                                    '<span>No digital analysis.</span>'
+                                }
                             </div>
-                        ` : ''}
-                    </div>
-                `;
-            });
+                            <div class="notes-section">
+                                <span class="notes-label">Your Session Notes</span>
+                                <textarea id="notes-${date}" class="notes-area" placeholder="Add beta, how you felt, or specific sends...">${session.notes}</textarea>
+                                <button class="save-notes-btn" onclick="saveNotes('${date}', this)">Save Notes</button>
+                            </div>
+                            ${highlights.length > 0 ? `
+                                <div class="highlights">
+                                    ${highlights.map(h => `
+                                        <div class="highlight-item">
+                                            <img src="${h.img}">
+                                            <div class="highlight-label">${h.label}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+            } catch (e) {
+                console.error('Error loading journal:', e);
+                document.getElementById('journal-content').innerText = 'Failed to load journal.';
+            }
         }
         load();
     </script>
