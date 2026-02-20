@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Strategy | Fetch OS</title>
+    <style>
+        body { font-family: sans-serif; background: #0a0a0a; color: #f5f5f5; padding: 2rem; line-height: 1.6; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1, h2, h3 { color: #38bdf8; margin-top: 2rem; }
+        a { color: #38bdf8; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .back-link { color: #888; margin-bottom: 2rem; display: block; }
+        .card { background: #141414; padding: 1.5rem; border-radius: 8px; border: 1px solid #262626; margin: 1rem 0; }
+        .card h3 { margin-top: 0; color: #f5f5f5; }
+        code { background: #262626; padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; color: #e5e5e5; }
+        pre { background: #141414; padding: 1rem; border-radius: 8px; overflow-x: auto; border: 1px solid #262626; }
+        ul { padding-left: 1.5rem; }
+        li { margin-bottom: 0.5rem; }
+        .highlight { color: #facc15; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Reports Index</a>
+        
+        <h1>Multi-Agent Strategy: The Fetch Ecosystem</h1>
+        <p><strong>Date:</strong> February 20, 2026</p>
+        <p><strong>Status:</strong> Proposal</p>
+
+        <h2>1. Executive Summary</h2>
+        <p>The current setup relies on a single "Fetch" agent to manage disparate domains: high-stakes trading (i360), physical performance (Climbing Lab), personal habits (The Protocol), and infrastructure (SysAdmin). This monolithic approach creates risks of context pollution, tool misuse, and reduced specialized performance.</p>
+        <p>This proposal recommends transitioning to a <strong>Federated Agent Model</strong>, where dedicated agents handle specific domains, routed via context-aware bindings (primarily WhatsApp Groups).</p>
+
+        <h2>2. Current vs. Proposed Architecture</h2>
+        
+        <div class="card">
+            <h3>Current State (Monolithic)</h3>
+            <ul>
+                <li><strong>Single Agent:</strong> "Fetch" handles everything.</li>
+                <li><strong>Shared Context:</strong> Trading logs mix with climbing beta and server alerts.</li>
+                <li><strong>Security Risk:</strong> A hallucination in a climbing chat could trigger a SysAdmin tool.</li>
+                <li><strong>Prompt Dilution:</strong> System prompt must cover too many domains, reducing specific efficacy.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>Proposed State (Federated)</h3>
+            <ul>
+                <li><strong>Agent 1: Fetch (Main)</strong> - Habits, Journaling, General Life (The Protocol).</li>
+                <li><strong>Agent 2: i360 (Trader)</strong> - Market analysis, Position management.</li>
+                <li><strong>Agent 3: Climbing Lab</strong> - Vision analysis, Training logs.</li>
+                <li><strong>Agent 4: SysAdmin</strong> - Infrastructure, Cloudflare, Nginx.</li>
+            </ul>
+        </div>
+
+        <h2>3. Agent Specialization & Isolation</h2>
+        
+        <h3>Why Isolate?</h3>
+        <ul>
+            <li><strong>Context Purity:</strong> The <span class="highlight">i360</span> agent's memory only contains market data, not climbing shoe sizes. This reduces hallucinations and improves financial reasoning.</li>
+            <li><strong>Tool Safety:</strong> The <span class="highlight">SysAdmin</span> agent is the <em>only</em> one with <code>exec</code> or <code>ssh</code> access. The General agent cannot accidentally delete files.</li>
+            <li><strong>Model Optimization:</strong> 
+                <ul>
+                    <li>Trading: High-reasoning model (e.g., Claude 3.5 Sonnet / Opus).</li>
+                    <li>Climbing: Vision-capable model (e.g., GPT-4o).</li>
+                    <li>General: Fast, conversational model.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2>4. Routing Strategy (The "How")</h2>
+        <p>Since the user is a single individual (one phone number), we cannot route by sender alone. We use <strong>Channel/Group Routing</strong> to direct intent.</p>
+
+        <table style="width:100%; text-align:left; border-collapse:collapse; margin-top:1rem;">
+            <thead>
+                <tr style="border-bottom: 1px solid #333;">
+                    <th style="padding:0.5rem;">Input Channel</th>
+                    <th style="padding:0.5rem;">Routed Agent</th>
+                    <th style="padding:0.5rem;">Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #262626;">
+                    <td style="padding:0.5rem;">WhatsApp DM</td>
+                    <td style="padding:0.5rem;"><strong>Fetch (Main)</strong></td>
+                    <td style="padding:0.5rem;">Quick notes, habits, daily chat.</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #262626;">
+                    <td style="padding:0.5rem;">Group: "Fetch Trading"</td>
+                    <td style="padding:0.5rem;"><strong>i360</strong></td>
+                    <td style="padding:0.5rem;">Deep financial work.</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #262626;">
+                    <td style="padding:0.5rem;">Group: "Climbing Logs"</td>
+                    <td style="padding:0.5rem;"><strong>Climbing Lab</strong></td>
+                    <td style="padding:0.5rem;">Uploading session photos/logs.</td>
+                </tr>
+                <tr>
+                    <td style="padding:0.5rem;">Group: "SysAdmin"</td>
+                    <td style="padding:0.5rem;"><strong>SysAdmin</strong></td>
+                    <td style="padding:0.5rem;">Server commands & alerts.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>5. Configuration (openclaw.json)</h2>
+        <pre><code class="language-json">
+{
+  "agents": {
+    "list": [
+      {
+        "id": "main",
+        "name": "Fetch",
+        "workspace": "~/.openclaw/workspace",
+        "default": true
+      },
+      {
+        "id": "i360",
+        "name": "i360 Trader",
+        "workspace": "~/.openclaw/workspace-i360",
+        "tools": { "deny": ["exec"] } 
+      },
+      {
+        "id": "sysadmin",
+        "name": "SysAdmin",
+        "workspace": "~/.openclaw/workspace-sysadmin",
+        "tools": { "allow": ["exec", "ssh", "read", "write"] }
+      }
+    ]
+  },
+  "bindings": [
+    // Default DM -> Main
+    { "agentId": "main", "match": { "channel": "whatsapp" } },
+    
+    // Group Routing
+    { 
+      "agentId": "i360", 
+      "match": { 
+        "channel": "whatsapp", 
+        "peer": { "kind": "group", "id": "1203630...@g.us" } // "Fetch Trading" Group ID
+      } 
+    },
+    { 
+      "agentId": "sysadmin", 
+      "match": { 
+        "channel": "whatsapp", 
+        "peer": { "kind": "group", "id": "1203631...@g.us" } // "SysAdmin" Group ID
+      } 
+    }
+  ]
+}
+        </code></pre>
+
+        <h2>6. Next Steps</h2>
+        <ol>
+            <li><strong>Create Workspaces:</strong> <code>openclaw agents add i360</code>, <code>openclaw agents add sysadmin</code>.</li>
+            <li><strong>Create WhatsApp Groups:</strong> Add the bot to new groups for Trading, Climbing, and SysAdmin.</li>
+            <li><strong>Get Group IDs:</strong> Use <code>openclaw sessions list</code> after messaging in the groups to find their IDs.</li>
+            <li><strong>Update Config:</strong> Apply the bindings in <code>openclaw.json</code>.</li>
+        </ol>
+    </div>
+</body>
+</html>
