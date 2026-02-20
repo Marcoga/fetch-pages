@@ -96,6 +96,11 @@
         .analysis-box { background: #0d1117; border: 1px solid var(--border); padding: 1.5rem; border-radius: 8px; }
         .analysis-box h3 { margin-top: 0; font-size: 1.1rem; color: var(--muted); }
         
+        /* Session Notes Area */
+        .session-notes-box { background: #0d1117; border: 1px solid var(--border); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; }
+        .session-notes-box h3 { margin-top: 0; font-size: 1.1rem; color: var(--muted); margin-bottom: 10px; }
+        .session-notes-text { font-size: 0.95rem; line-height: 1.5; color: var(--text); white-space: pre-wrap; }
+
         .link-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1rem; }
         .btn-link { text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; transition: 0.2s; background: var(--border); color: var(--text); border: 1px solid transparent; }
         .btn-link:hover { border-color: var(--accent); }
@@ -168,6 +173,12 @@
                 <h2 id="view-date">Select a day</h2>
                 <span class="session-climber-tag" id="view-climber">--</span>
             </div>
+
+            <div class="session-notes-box" id="view-notes-container" style="display:none;">
+                <h3>📝 Session Notes</h3>
+                <div class="session-notes-text" id="view-notes"></div>
+            </div>
+
             <div class="analysis-cards">
                 <div class="analysis-box">
                     <h3>Marco</h3>
@@ -179,7 +190,6 @@
                 </div>
             </div>
             
-            <!-- NEW HIGHLIGHTS SECTION -->
             <div class="highlights-section" id="view-highlights-container" style="display:none;">
                 <h3>🎬 Session Highlights</h3>
                 <div class="highlight-grid" id="view-highlights"></div>
@@ -196,7 +206,6 @@
     <script>
         let sessionCache = {};
         
-        // Manual override for known highlights until we automate this in the DB
         const manualHighlights = {
             '2026-02-19': [
                 { label: 'Marco: 6b Send', img: 'assets/climb-gifs/climb_1.gif' },
@@ -222,30 +231,40 @@
             const marcoCont = document.getElementById('view-marco-links');
             const giselleCont = document.getElementById('view-giselle-links');
             const climberTag = document.getElementById('view-climber');
+            const notesWrap = document.getElementById('view-notes-container');
+            const notesText = document.getElementById('view-notes');
             const highlightsWrap = document.getElementById('view-highlights-container');
             const highlightsGrid = document.getElementById('view-highlights');
 
             if (!session) {
-                marcoCont.innerHTML = '<a href="#" class="btn-link">Write Notes</a>';
-                giselleCont.innerHTML = '<a href="#" class="btn-link">Write Notes</a>';
+                marcoCont.innerHTML = '<a href="journal/marco.html" class="btn-link">Write Notes</a>';
+                giselleCont.innerHTML = '<a href="journal/giselle.html" class="btn-link">Write Notes</a>';
                 climberTag.innerText = 'Rest Day';
+                notesWrap.style.display = 'none';
                 highlightsWrap.style.display = 'none';
                 return;
             }
 
             climberTag.innerText = session.climber;
             
+            // Show Notes
+            if (session.notes && session.notes.trim() !== '') {
+                notesWrap.style.display = 'block';
+                notesText.innerText = session.notes;
+            } else {
+                notesWrap.style.display = 'none';
+            }
+
             const marcoAnalyses = session.analyses.filter(a => !a.url.includes('giselle'));
             const giselleAnalyses = session.analyses.filter(a => a.url.includes('giselle'));
 
-            const buildLinks = (list) => list.length > 0 
+            const buildLinks = (list, user) => list.length > 0 
                 ? list.map(a => `<a href="${window.location.origin}/${a.url}" class="btn-link ${a.model}">${a.model.toUpperCase()} Review</a>`).join('')
-                : '<a href="#" class="btn-link">Write Notes</a>';
+                : `<a href="journal/${user}.html" class="btn-link">Write Notes</a>`;
 
-            marcoCont.innerHTML = buildLinks(marcoAnalyses);
-            giselleCont.innerHTML = buildLinks(giselleAnalyses);
+            marcoCont.innerHTML = buildLinks(marcoAnalyses, 'marco');
+            giselleCont.innerHTML = buildLinks(giselleAnalyses, 'giselle');
 
-            // Handle Highlights
             const highlights = manualHighlights[dateStr];
             if (highlights) {
                 highlightsWrap.style.display = 'block';
@@ -267,7 +286,7 @@
                 
                 data.forEach(row => {
                     if (!sessionCache[row.date]) {
-                        sessionCache[row.date] = { date: row.date, climber: row.climber, analyses: [] };
+                        sessionCache[row.date] = { date: row.date, climber: row.climber, notes: row.notes, analyses: [] };
                     }
                     if (row.url) sessionCache[row.date].analyses.push({ model: row.model, url: row.url });
                 });
