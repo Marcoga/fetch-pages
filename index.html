@@ -72,11 +72,13 @@
             grid-template-rows: repeat(7, 15px); 
             gap: 3px; 
         }
-        .cell { width: 15px; height: 15px; border-radius: 2px; background: var(--empty); cursor: pointer; position: relative; }
+        .cell { width: 15px; height: 15px; border-radius: 2px; background: var(--empty); cursor: pointer; position: relative; border: 1px solid rgba(255,255,255,0.03); transition: border 0.1s; }
         .cell:hover { border: 1px solid #999; }
+        .cell.selected { border: 2px solid #fff; z-index: 2; }
         .cell.active-marco { background: var(--marco-color); }
         .cell.active-giselle { background: var(--giselle-color); }
         .cell.active-both { background: var(--both-color); }
+        
         .tooltip { visibility: hidden; width: 140px; background-color: #000; color: #fff; text-align: center; border-radius: 4px; padding: 5px; position: absolute; z-index: 10; bottom: 125%; left: 50%; margin-left: -70px; font-size: 0.7rem; pointer-events: none; border: 1px solid var(--border); }
         .cell:hover .tooltip { visibility: visible; }
 
@@ -84,27 +86,32 @@
         .legend-item { display: flex; align-items: center; gap: 0.4rem; }
         .legend-box { width: 10px; height: 10px; border-radius: 2px; }
 
-        .climbers { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-        .climber-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; }
-        .climber-card h2 { margin-top: 0; font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        /* Focused Session Section */
+        .focused-session { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin-top: 2rem; }
+        .session-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+        .session-header h2 { margin: 0; color: var(--accent); }
+        .session-climber-tag { padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: bold; background: var(--border); }
         
-        .session-item { margin-bottom: 0.8rem; padding: 0.8rem; background: #0d1117; border-radius: 4px; border-left: 3px solid transparent; }
-        .session-item.marco-border { border-left-color: var(--marco-color); }
-        .session-item.giselle-border { border-left-color: var(--giselle-color); }
-        .session-item.both-border { border-left-color: var(--both-color); }
+        .analysis-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .analysis-box { background: #0d1117; border: 1px solid var(--border); padding: 1.5rem; border-radius: 8px; }
+        .analysis-box h3 { margin-top: 0; font-size: 1.1rem; color: var(--muted); }
         
-        .session-date { font-weight: bold; font-size: 0.85rem; color: var(--accent); margin-bottom: 0.5rem; display: block; }
-        .analysis-links { display: flex; flex-wrap: wrap; gap: 6px; }
-        .analysis-links a { font-size: 0.7rem; text-decoration: none; padding: 3px 6px; border-radius: 3px; background: var(--border); color: var(--text); }
-        .analysis-links a:hover { background: #444; }
-        .analysis-links a.opus { color: #38bdf8; }
+        .link-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1rem; }
+        .btn-link { text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; transition: 0.2s; background: var(--border); color: var(--text); border: 1px solid transparent; }
+        .btn-link:hover { border-color: var(--accent); }
+        .btn-link.opus { color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
+        .btn-link.fetch { background: rgba(251, 191, 36, 0.1); }
+
+        .journal-links { text-align: center; margin-top: 3rem; }
+        .journal-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; margin: 0 15px; }
+        .journal-links a:hover { color: var(--accent); text-decoration: underline; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>⚡ Fetch Climbing Lab</h1>
-            <div style="color: var(--muted); font-size: 0.8rem;">Live Engine v2.2</div>
+            <div style="color: var(--muted); font-size: 0.8rem;">Live Engine v2.3</div>
         </header>
 
         <div class="stats-grid">
@@ -129,7 +136,7 @@
             </div>
         </div>
 
-        <div class="section-title">📊 Training Timeline</div>
+        <div class="section-title">📊 Training Timeline (Click a day to filter)</div>
         <div class="heatmap-wrap">
             <div class="months-row" id="months-row"></div>
             <div class="heatmap-container">
@@ -146,40 +153,86 @@
             <div class="legend-item"><div class="legend-box" style="background: var(--both-color)"></div> Team Session</div>
         </div>
 
-        <div class="climbers">
-            <div class="climber-card">
-                <h2>Marco</h2>
-                <div id="marco-sessions"></div>
+        <!-- Filtered Detail View -->
+        <div class="focused-session" id="session-viewer">
+            <div class="session-header">
+                <h2 id="view-date">Select a day</h2>
+                <span class="session-climber-tag" id="view-climber">--</span>
             </div>
-            <div class="climber-card">
-                <h2>Giselle</h2>
-                <div id="giselle-sessions"></div>
+            <div class="analysis-cards">
+                <div class="analysis-box">
+                    <h3>Marco</h3>
+                    <div id="view-marco-links" class="link-grid">No analysis available.</div>
+                </div>
+                <div class="analysis-box">
+                    <h3>Giselle</h3>
+                    <div id="view-giselle-links" class="link-grid">No analysis available.</div>
+                </div>
             </div>
+        </div>
+
+        <div class="journal-links">
+            <a href="journal/marco.html">Full Journal: Marco</a>
+            <span>|</span>
+            <a href="journal/giselle.html">Full Journal: Giselle</a>
         </div>
     </div>
 
     <script>
+        let sessionCache = {};
+
+        function showSession(dateStr) {
+            const session = sessionCache[dateStr];
+            document.getElementById('view-date').innerText = dateStr;
+            
+            // Highlight selected cell
+            document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
+            const activeCell = document.querySelector(`.cell[data-date="${dateStr}"]`);
+            if (activeCell) activeCell.classList.add('selected');
+
+            const marcoCont = document.getElementById('view-marco-links');
+            const giselleCont = document.getElementById('view-giselle-links');
+            const climberTag = document.getElementById('view-climber');
+
+            if (!session) {
+                marcoCont.innerHTML = '<a href="#" class="btn-link">Write Notes</a>';
+                giselleCont.innerHTML = '<a href="#" class="btn-link">Write Notes</a>';
+                climberTag.innerText = 'Rest Day';
+                return;
+            }
+
+            climberTag.innerText = session.climber;
+            
+            const marcoAnalyses = session.analyses.filter(a => !a.url.includes('giselle'));
+            const giselleAnalyses = session.analyses.filter(a => a.url.includes('giselle'));
+
+            const buildLinks = (list) => list.length > 0 
+                ? list.map(a => `<a href="${a.url}" class="btn-link ${a.model}">${a.model.toUpperCase()} Review</a>`).join('')
+                : '<a href="#" class="btn-link">Write Notes</a>';
+
+            marcoCont.innerHTML = buildLinks(marcoAnalyses);
+            giselleCont.innerHTML = buildLinks(giselleAnalyses);
+        }
+
         async function init() {
             try {
                 const res = await fetch('https://api.marcoga.com/api/sessions');
                 const data = await res.json();
-                const sessionsByDate = {};
+                
                 data.forEach(row => {
-                    if (!sessionsByDate[row.date]) {
-                        sessionsByDate[row.date] = { date: row.date, climber: row.climber, analyses: [] };
+                    if (!sessionCache[row.date]) {
+                        sessionCache[row.date] = { date: row.date, climber: row.climber, analyses: [] };
                     }
-                    if (row.url) sessionsByDate[row.date].analyses.push({ model: row.model, url: row.url });
+                    if (row.url) sessionCache[row.date].analyses.push({ model: row.model, url: row.url });
                 });
 
-                const sessionList = Object.values(sessionsByDate).sort((a,b) => b.date.localeCompare(a.date));
-                document.getElementById('stat-sessions').innerText = Object.keys(sessionsByDate).filter(d => d.includes('2026-02')).length;
+                const sortedDates = Object.keys(sessionCache).sort().reverse();
+                
+                document.getElementById('stat-sessions').innerText = sortedDates.filter(d => d.includes('2026-02')).length;
 
                 const heatmap = document.getElementById('heatmap-team');
                 const monthsRow = document.getElementById('months-row');
-                
-                // Start from the beginning of the year
                 const startDate = new Date('2026-01-01');
-                // Move back to the first Sunday of the year (or previous year)
                 startDate.setDate(startDate.getDate() - startDate.getDay());
 
                 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -191,30 +244,30 @@
                     const curr = new Date(startDate);
                     curr.setDate(startDate.getDate() + i);
                     const dateStr = curr.toISOString().split('T')[0];
+                    cell.setAttribute('data-date', dateStr);
                     
-                    // Month labels at the top of each column (Sunday)
                     if (curr.getDay() === 0) {
                         const month = curr.getMonth();
                         if (month !== lastMonth) {
                             const span = document.createElement('span');
                             span.className = 'month-label';
                             span.innerText = monthNames[month];
-                            // calculate offset: (column index) * (width + gap)
-                            const colIndex = Math.floor(i / 7);
-                            span.style.left = (colIndex * 18) + 'px';
+                            span.style.left = (Math.floor(i / 7) * 18) + 'px';
                             monthsRow.appendChild(span);
                             lastMonth = month;
                         }
                     }
 
-                    const session = sessionsByDate[dateStr];
+                    const session = sessionCache[dateStr];
                     if (session) {
-                        const climber = session.climber.toLowerCase();
-                        if (climber.includes('marco') && climber.includes('giselle')) cell.classList.add('active-both');
-                        else if (climber.includes('giselle')) cell.classList.add('active-giselle');
-                        else if (climber.includes('marco')) cell.classList.add('active-marco');
+                        const cl = session.climber.toLowerCase();
+                        if (cl.includes('marco') && cl.includes('giselle')) cell.classList.add('active-both');
+                        else if (cl.includes('giselle')) cell.classList.add('active-giselle');
+                        else if (cl.includes('marco')) cell.classList.add('active-marco');
                     }
                     
+                    cell.onclick = () => showSession(dateStr);
+
                     const tt = document.createElement('span');
                     tt.className = 'tooltip';
                     tt.innerText = session ? `${dateStr}: ${session.climber}` : dateStr;
@@ -222,21 +275,9 @@
                     heatmap.appendChild(cell);
                 }
 
-                const mCont = document.getElementById('marco-sessions');
-                const gCont = document.getElementById('giselle-sessions');
-                sessionList.forEach(s => {
-                    const mAn = s.analyses.filter(a => !a.url.includes('giselle'));
-                    const gAn = s.analyses.filter(a => a.url.includes('giselle'));
-                    const make = (date, an, type) => `
-                        <div class="session-item ${type}-border">
-                            <span class="session-date">${date}</span>
-                            <div class="analysis-links">
-                                ${an.length > 0 ? an.map(a => `<a href="${a.url}" class="${a.model}">${a.model.toUpperCase()}</a>`).join('') : '<a href="#">Notes</a>'}
-                            </div>
-                        </div>`;
-                    if (s.climber.includes('Marco')) mCont.innerHTML += make(s.date, mAn, 'marco');
-                    if (s.climber.includes('Giselle')) gCont.innerHTML += make(s.date, gAn, 'giselle');
-                });
+                // Pre-select latest session
+                if (sortedDates.length > 0) showSession(sortedDates[0]);
+
             } catch (e) { console.error(e); }
         }
         init();
