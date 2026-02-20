@@ -31,31 +31,29 @@
 
         .section-title { font-size: 1.2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
         
-        /* Fixed Heatmap Alignment */
         .heatmap-wrap { 
             background: var(--card); 
             border: 1px solid var(--border); 
             padding: 1.5rem; 
             border-radius: 6px; 
             margin-bottom: 1rem;
-            display: inline-block;
-            min-width: 100%;
+            width: fit-content;
         }
         .heatmap-container { 
             display: flex; 
             gap: 10px; 
         }
         .months-row { 
-            display: grid;
-            grid-template-columns: repeat(53, 15px);
-            gap: 3px;
-            margin-left: 28px; 
+            display: flex;
+            margin-left: 30px; 
             margin-bottom: 5px; 
             font-size: 10px; 
             color: var(--muted); 
+            position: relative;
+            height: 15px;
         }
-        .months-row span {
-            grid-column: span 4; /* Rough approximation for 4 weeks per month */
+        .month-label {
+            position: absolute;
         }
         .days-labels { 
             display: grid; 
@@ -64,6 +62,8 @@
             font-size: 10px; 
             color: var(--muted);
             line-height: 15px;
+            text-align: right;
+            width: 25px;
         }
         .heatmap { 
             display: grid; 
@@ -72,12 +72,11 @@
             grid-template-rows: repeat(7, 15px); 
             gap: 3px; 
         }
-        .cell { width: 15px; height: 15px; border-radius: 2px; background: var(--empty); cursor: pointer; position: relative; border: 1px solid rgba(255,255,255,0.03); }
+        .cell { width: 15px; height: 15px; border-radius: 2px; background: var(--empty); cursor: pointer; position: relative; }
         .cell:hover { border: 1px solid #999; }
-        .cell.marco { background: var(--marco-color); }
-        .cell.giselle { background: var(--giselle-color); }
-        .cell.both { background: var(--both-color); }
-        
+        .cell.active-marco { background: var(--marco-color); }
+        .cell.active-giselle { background: var(--giselle-color); }
+        .cell.active-both { background: var(--both-color); }
         .tooltip { visibility: hidden; width: 140px; background-color: #000; color: #fff; text-align: center; border-radius: 4px; padding: 5px; position: absolute; z-index: 10; bottom: 125%; left: 50%; margin-left: -70px; font-size: 0.7rem; pointer-events: none; border: 1px solid var(--border); }
         .cell:hover .tooltip { visibility: visible; }
 
@@ -105,7 +104,7 @@
     <div class="container">
         <header>
             <h1>⚡ Fetch Climbing Lab</h1>
-            <div style="color: var(--muted); font-size: 0.8rem;">Live Engine v2.1</div>
+            <div style="color: var(--muted); font-size: 0.8rem;">Live Engine v2.2</div>
         </header>
 
         <div class="stats-grid">
@@ -135,7 +134,7 @@
             <div class="months-row" id="months-row"></div>
             <div class="heatmap-container">
                 <div class="days-labels">
-                    <span>Sun</span><span></span><span>Tue</span><span></span><span>Thu</span><span></span><span>Sat</span>
+                    <span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span>
                 </div>
                 <div class="heatmap" id="heatmap-team"></div>
             </div>
@@ -177,8 +176,10 @@
 
                 const heatmap = document.getElementById('heatmap-team');
                 const monthsRow = document.getElementById('months-row');
+                
+                // Start from the beginning of the year
                 const startDate = new Date('2026-01-01');
-                // Adjust start to previous Sunday
+                // Move back to the first Sunday of the year (or previous year)
                 startDate.setDate(startDate.getDate() - startDate.getDay());
 
                 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -191,25 +192,29 @@
                     curr.setDate(startDate.getDate() + i);
                     const dateStr = curr.toISOString().split('T')[0];
                     
-                    // Add Month Labels
-                    if (curr.getDay() === 0) { // New column (Sunday)
-                        if (curr.getMonth() !== lastMonth) {
-                            const monthSpan = document.createElement('span');
-                            monthSpan.innerText = monthNames[curr.getMonth()];
-                            monthsRow.appendChild(monthSpan);
-                            lastMonth = curr.getMonth();
-                        } else {
-                            const emptySpan = document.createElement('span');
-                            monthsRow.appendChild(emptySpan);
+                    // Month labels at the top of each column (Sunday)
+                    if (curr.getDay() === 0) {
+                        const month = curr.getMonth();
+                        if (month !== lastMonth) {
+                            const span = document.createElement('span');
+                            span.className = 'month-label';
+                            span.innerText = monthNames[month];
+                            // calculate offset: (column index) * (width + gap)
+                            const colIndex = Math.floor(i / 7);
+                            span.style.left = (colIndex * 18) + 'px';
+                            monthsRow.appendChild(span);
+                            lastMonth = month;
                         }
                     }
 
                     const session = sessionsByDate[dateStr];
                     if (session) {
-                        if (session.climber.includes('Marco') && session.climber.includes('Giselle')) cell.classList.add('both');
-                        else if (session.climber.includes('Giselle')) cell.classList.add('giselle');
-                        else cell.classList.add('marco');
+                        const climber = session.climber.toLowerCase();
+                        if (climber.includes('marco') && climber.includes('giselle')) cell.classList.add('active-both');
+                        else if (climber.includes('giselle')) cell.classList.add('active-giselle');
+                        else if (climber.includes('marco')) cell.classList.add('active-marco');
                     }
+                    
                     const tt = document.createElement('span');
                     tt.className = 'tooltip';
                     tt.innerText = session ? `${dateStr}: ${session.climber}` : dateStr;
