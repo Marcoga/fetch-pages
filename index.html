@@ -1,239 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🧗 Summer Recomp — Power-Bouldering Protocol</title>
-<style>
-  :root { --bg: #0a0a0a; --card: #141414; --accent: #fbbf24; --accent2: #38bdf8; --text: #f5f5f5; --muted: #a3a3a3; --green: #22c55e; --red: #ef4444; --border: #262626; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 1.5rem; max-width: 1000px; margin: 0 auto; }
-  
-  h1 { font-size: 2.5rem; margin-bottom: 0.5rem; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .subtitle { color: var(--muted); margin-bottom: 2.5rem; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
-  h2 { color: var(--accent); font-size: 1.6rem; margin: 2.5rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
-  h3 { color: var(--accent2); font-size: 1.2rem; margin: 1.5rem 0 0.5rem; }
-  
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; transition: transform 0.2s; }
-  .card.highlight { border-color: var(--accent); background: rgba(251, 191, 36, 0.05); }
-  .card.aesthetic { border-color: var(--accent2); background: rgba(56, 189, 248, 0.05); }
-  
-  .protocol-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; }
-  @media (max-width: 850px) { .protocol-grid { grid-template-columns: 1fr; } }
-  
-  .target-badge { display: inline-block; background: var(--border); color: var(--text); padding: 4px 12px; border-radius: 999px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; }
-  .target-badge.recomp { background: var(--accent); color: #000; }
-  
-  ul { padding-left: 1.5rem; margin: 0.75rem 0; }
-  li { margin-bottom: 0.5rem; }
-  
-  .tip { background: #171717; border-left: 4px solid var(--accent); padding: 1rem; margin: 1rem 0; border-radius: 4px 12px 12px 4px; }
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; }
-  .stat-card { background: #1c1c1c; padding: 1rem; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
-  .stat-val { font-size: 1.5rem; font-weight: 800; color: var(--accent2); display: block; }
-  .stat-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Climbing Lab | Dashboard</title>
+    <style>
+        :root { 
+            --bg: #0a0a0a; --card: #141414; --accent: #fbbf24; --text: #f5f5f5; 
+            --muted: #a3a3a3; --border: #262626; --green-0: #161b22; --green-1: #0e4429;
+            --green-2: #006d32; --green-3: #26a641; --green-4: #39d353;
+        }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 2rem; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+        h1 { color: var(--accent); margin: 0; font-size: 1.8rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; }
+        .stat-card h3 { margin: 0 0 0.5rem 0; font-size: 0.9rem; color: var(--muted); text-transform: uppercase; }
+        .stat-card .value { font-size: 2rem; font-weight: bold; color: var(--accent); }
+        
+        .section-title { font-size: 1.2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .heatmap-container { background: var(--card); border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; margin-bottom: 3rem; overflow-x: auto; }
+        .heatmap { display: grid; grid-template-columns: repeat(53, 15px); grid-template-rows: repeat(7, 15px); gap: 3px; }
+        .cell { width: 15px; height: 15px; border-radius: 2px; background: var(--green-0); cursor: pointer; position: relative; }
+        .cell:hover { border: 1px solid #fff; }
+        .cell.v1 { background: var(--green-1); }
+        .cell.v2 { background: var(--green-2); }
+        .cell.v3 { background: var(--green-3); }
+        .cell.v4 { background: var(--green-4); }
 
-  table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
-  th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid var(--border); }
-  th { color: var(--accent); font-size: 0.9rem; text-transform: uppercase; font-weight: 700; }
-  
-  .video-container { position:relative; padding-bottom:56.25%; height:0; border-radius:12px; overflow:hidden; margin: 1rem 0; }
-  .video-container iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:0; }
-
-  .save-btn { background: var(--accent); color: #000; border: none; padding: 0.75rem 2rem; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; }
-  .save-btn:hover { transform: scale(1.02); filter: brightness(1.1); }
-  .notes-area { width: 100%; min-height: 150px; background: #0a0a0a; border: 1px solid var(--border); border-radius: 12px; color: #fff; padding: 1rem; font-size: 1rem; margin-top: 1rem; }
-
-  nav { display: flex; gap: 1rem; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
-  nav a { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 600; }
-  nav a:hover { color: var(--text); }
-  nav a.active { color: var(--accent2); }
-
-  details summary { cursor: pointer; color: var(--accent2); font-weight: 600; margin-bottom: 0.5rem; outline: none; list-style: none; display: flex; align-items: center; gap: 0.5rem; }
-  details summary::-webkit-details-marker { display: none; }
-  details summary:before { content: "▶"; font-size: 0.8rem; transition: transform 0.2s; }
-  details[open] summary:before { transform: rotate(90deg); }
-</style>
+        .climbers { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .climber-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+        .climber-card h2 { margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        .goal-list { list-style: none; padding: 0; }
+        .goal-list li { margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; }
+        .goal-list li::before { content: "🎯"; }
+        
+        .recent-videos { margin-top: 3rem; }
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+        .video-thumb { background: #000; aspect-ratio: 9/16; border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--muted); text-decoration: none; position: relative; overflow: hidden; }
+        .video-thumb:hover { border-color: var(--accent); }
+        .video-thumb span { z-index: 2; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .video-thumb img { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>⚡ Fetch Climbing Lab</h1>
+            <nav>
+                <a href="recomp.html" style="color: var(--muted); text-decoration: none; margin-right: 15px;">Summer Recomp</a>
+                <a href="progression.html" style="color: var(--muted); text-decoration: none;">Grade Guide</a>
+            </nav>
+            <div id="last-sync" style="color: var(--muted); font-size: 0.8rem;">Last Sync: Feb 19, 16:50</div>
+        </header>
 
-<nav>
-  <a href="index.html" class="active">SUMMER RECOMP</a>
-  <a href="i360-startup-plan.html">i360 STARTUP</a>
-  <a href="progression.html">GRADE GUIDE</a>
-  <a href="storage-options.html">STORAGE OPTIONS</a>
-</nav>
-
-<h1>⚡ Summer Recomp Protocol</h1>
-<p class="subtitle"><span>🎯</span> 3-Month Transformation: Boulder Heavy + Powerlifting Complement</p>
-
-<div class="stat-grid">
-  <div class="stat-card">
-    <span class="stat-val">Slight Deficit</span>
-    <span class="stat-label">Diet Goal (-250kcal)</span>
-  </div>
-  <div class="stat-card">
-    <span class="stat-val">High Protein</span>
-    <span class="stat-label">1.8g - 2.0g per kg</span>
-  </div>
-  <div class="stat-card">
-    <span class="stat-val">3x Weekly</span>
-    <span class="stat-label">Compound Lifting</span>
-  </div>
-  <div class="stat-card">
-    <span class="stat-val">Most Days</span>
-    <span class="stat-label">Bouldering Frequency</span>
-  </div>
-</div>
-
-<h2>🗺️ The Master Strategy</h2>
-<div class="card highlight">
-  <p>We are leveraging <strong>Muscle Memory</strong> to reclaim lost size while using <strong>Bouldering</strong> to lean out and add high-definition detail. Because you want to boulder most days, the lifting is "low volume, high intensity" — we get in, move heavy weight to signal muscle retention, and get out.</p>
-</div>
-
-<div class="protocol-grid">
-  <div>
-    <h3>📅 Weekly Training Split</h3>
-    <div class="card">
-      <table>
-        <tr><th>Day</th><th>Activity</th><th>Intensity</th></tr>
-        <tr><td><strong>Mon</strong></td><td>Bouldering (Limit)</td><td>🔥 Hard Projects</td></tr>
-        <tr><td><strong>Tue</strong></td><td><strong>LIFT A (Foundation)</strong></td><td>💪 Heavy Compound</td></tr>
-        <tr><td><strong>Wed</strong></td><td>Bouldering (Volume)</td><td>🧗 Flow/Technique</td></tr>
-        <tr><td><strong>Thu</strong></td><td><strong>LIFT B (Power)</strong></td><td>💥 Heavy Pull/Press</td></tr>
-        <tr><td><strong>Fri</strong></td><td>Bouldering (Limit)</td><td>🔥 Hard Projects</td></tr>
-        <tr><td><strong>Sat</strong></td><td><strong>LIFT C (Aesthetics)</strong></td><td>✨ Volume/Hypertrophy</td></tr>
-        <tr><td><strong>Sun</strong></td><td>Full Rest / Zone 2</td><td>🧘 Recovery</td></tr>
-      </table>
-      <div class="tip">💡 <strong>Double Days:</strong> If you boulder and lift on the same day, always <strong>Boulder First</strong> while your CNS and coordination are fresh.</div>
-    </div>
-
-    <h3>🏋️ The Lifting Protocol</h3>
-    <div class="card">
-      <span class="target-badge">3 Sets per Exercise</span>
-      
-      <h4>Session A: The Foundation</h4>
-      <ul>
-        <li><strong>Back Squat:</strong> 3 x 5 (Add 2.5kg each week)</li>
-        <li><strong>Bench Press:</strong> 3 x 5 (Add 2.5kg each week)</li>
-        <li><strong>Weighted Pull-ups:</strong> 3 x 8 (Bouldering back width)</li>
-      </ul>
-
-      <h4>Session B: The Power</h4>
-      <ul>
-        <li><strong>Deadlift:</strong> 1 x 5 (Go heavy)</li>
-        <li><strong>Overhead Press:</strong> 3 x 5 (Solid shoulders)</li>
-        <li><strong>Barbell Rows:</strong> 3 x 10 (Thickening the lats)</li>
-      </ul>
-
-      <h4>Session C: The Summer Build</h4>
-      <ul>
-        <li><strong>Incline DB Press:</strong> 3 x 10 (Upper chest focus)</li>
-        <li><strong>Bulgarian Split Squats:</strong> 3 x 10 (Leg definition)</li>
-        <li><strong>Dips:</strong> 3 x Max (Chest/Tricep pump)</li>
-      </ul>
-    </div>
-  </div>
-
-  <div>
-    <h3>✨ Aesthetics Finisher</h3>
-    <div class="card aesthetic">
-      <p>Add these to the end of <strong>every</strong> lift session to hit those "Look Great Naked" goals:</p>
-      <ul>
-        <li><strong>Hanging Leg Raises:</strong> 3 x 15 (Core/V-Line)</li>
-        <li><strong>Hammer Curls:</strong> 3 x 12 (Thick forearms/arms)</li>
-        <li><strong>Face Pulls:</strong> 3 x 15 (Posture/Shoulder health)</li>
-      </ul>
-    </div>
-
-    <h3>🥗 Nutrition Targets</h3>
-    <div class="card">
-      <p><strong>Calories:</strong> Maintenance minus 200-300 kcal.</p>
-      <div class="tip">
-        <strong>Protein:</strong> Aim for ~160g - 180g total daily.
-      </div>
-      <p><strong>Carbs:</strong> Cycle higher on Bouldering Project days. Keep them low on rest days.</p>
-    </div>
-
-    <h3>🧗 Bouldering Warm-up</h3>
-    <div class="card">
-      <details>
-        <summary>Show Warm-up Videos</summary>
-        <p>Essential pre-climb routine:</p>
-        <div class="video-container">
-          <iframe src="https://www.youtube.com/embed/UmwGVqAT5y8" allowfullscreen loading="lazy"></iframe>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Sessions (Feb)</h3>
+                <div class="value">12</div>
+            </div>
+            <div class="stat-card">
+                <h3>Videos Analyzed</h3>
+                <div class="value">24</div>
+            </div>
+            <div class="stat-card">
+                <h3>Top Grade</h3>
+                <div class="value">6b+</div>
+            </div>
+            <div class="stat-card">
+                <h3>Training Streak</h3>
+                <div class="value">3 Days</div>
+            </div>
         </div>
-      </details>
+
+        <div class="section-title">📊 Activity Heatmap (Marco)</div>
+        <div class="heatmap-container">
+            <div class="heatmap" id="heatmap-marco">
+                <!-- Generated by JS -->
+            </div>
+        </div>
+
+        <div class="climbers">
+            <div class="climber-card">
+                <h2>Marco</h2>
+                <ul class="goal-list">
+                    <li>Maintain straight arms on V3-V4 routes</li>
+                    <li>Perfect flagging on lateral movements</li>
+                    <li>Silent feet drill: 10 min every session</li>
+                </ul>
+                <a href="session-review-feb19.html" style="color: var(--accent); text-decoration: none; font-weight: bold;">View Detailed Log →</a>
+            </div>
+            <div class="climber-card">
+                <h2>Giselle</h2>
+                <ul class="goal-list">
+                    <li>Glue hips to wall on slopers</li>
+                    <li>Trust high-feet placements</li>
+                    <li>Continuous flow on vertical walls</li>
+                </ul>
+                <a href="giselle-feedback-feb19.html" style="color: var(--accent); text-decoration: none; font-weight: bold;">View Detailed Log →</a>
+            </div>
+        </div>
+
+        <div class="recent-videos">
+            <div class="section-title">🎬 Recent Highlights</div>
+            <div class="video-grid">
+                <a href="session-review-feb19.html" class="video-thumb">
+                    <img src="assets/climb-gifs/climb_1.gif">
+                    <span>Marco: 6b Send</span>
+                </a>
+                <a href="giselle-feedback-feb19.html" class="video-thumb">
+                    <img src="assets/giselle-gifs/g5_victory.gif">
+                    <span>Giselle: Yellow Send</span>
+                </a>
+                <a href="session-review-feb19.html" class="video-thumb">
+                    <img src="assets/climb-gifs/climb_4.gif">
+                    <span>Marco: Vol Mastery</span>
+                </a>
+                <a href="giselle-feedback-feb19.html" class="video-thumb">
+                    <img src="assets/giselle-gifs/g3_highstep.gif">
+                    <span>Giselle: High Step</span>
+                </a>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<h2>📈 3-Month Roadmap</h2>
-<div class="protocol-grid">
-  <div class="card">
-    <h4>Month 1: Re-Activation</h4>
-    <p>Focus on perfect form. Muscle memory will start to "fill out" your frame. Bouldering should focus on <em>Volume</em> (sending lots of 5s) to prep tendons.</p>
-  </div>
-  <div class="card">
-    <h4>Month 2: The Momentum</h4>
-    <p>Weights should be getting heavy. Start <em>Projecting</em> (Limit Bouldering) on the wall. This is where the most fat loss occurs.</p>
-  </div>
-  <div class="card">
-    <h4>Month 3: The Peak</h4>
-    <p>Tighten the deficit slightly if needed. High-intensity bouldering. This is the "Look Great Naked" final polish phase.</p>
-  </div>
-</div>
-
-<h2>📝 Daily Progress Log</h2>
-<div class="card">
-  <textarea class="notes-area" id="notes" placeholder="Day 1 Log: Bench went up easy. Sent my first 6a in the corner! Weight: 84kg..."></textarea>
-  <button class="save-btn" onclick="saveNotes()">Save Progress Log</button>
-</div>
-
-<script>
-  const API_URL = 'http://192.168.86.20:3300/api/logs';
-
-  async function saveNotes() {
-    const content = document.getElementById('notes').value;
-    localStorage.setItem('summer-recomp-notes', content);
-    const btn = document.querySelector('.save-btn');
-    
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content })
-      });
-      if (res.ok) {
-        btn.textContent = '✓ Progress Synced to DB';
-      } else {
-        btn.textContent = '✓ Saved Locally (Sync Error)';
-      }
-    } catch (e) {
-      console.error('Sync failed', e);
-      btn.textContent = '✓ Saved Locally (Offline)';
-    }
-    
-    setTimeout(() => btn.textContent = 'Save Progress Log', 2000);
-  }
-
-  async function loadNotes() {
-    document.getElementById('notes').value = localStorage.getItem('summer-recomp-notes') || '';
-    try {
-      const res = await fetch(API_URL);
-      if (res.ok) {
-        const logs = await res.json();
-        if (logs.length > 0) {
-          document.getElementById('notes').value = logs[0].content;
+    <script>
+        const heatmap = document.getElementById('heatmap-marco');
+        // Simple mock for 53 weeks x 7 days
+        for (let i = 0; i < 53 * 7; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            // Random mock data for visual effect
+            const r = Math.random();
+            if (r > 0.95) cell.classList.add('v4');
+            else if (r > 0.9) cell.classList.add('v3');
+            else if (r > 0.8) cell.classList.add('v2');
+            else if (r > 0.7) cell.classList.add('v1');
+            heatmap.appendChild(cell);
         }
-      }
-    } catch (e) {
-      console.error('Initial load from DB failed', e);
-    }
-  }
-
-  loadNotes();
-</script>
-
+    </script>
 </body>
 </html>
