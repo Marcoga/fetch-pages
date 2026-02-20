@@ -23,24 +23,61 @@
         .stat-card h3 { margin: 0 0 0.5rem 0; font-size: 0.8rem; color: var(--muted); text-transform: uppercase; }
         .stat-card .value { font-size: 1.8rem; font-weight: bold; color: var(--accent); }
         
-        /* Roadmap Section */
         .roadmap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
         .roadmap-card { background: #0d1117; border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem; }
         .roadmap-card h2 { font-size: 1rem; color: var(--accent); margin-top: 0; text-transform: uppercase; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
         .goal-item { margin: 10px 0; display: flex; align-items: flex-start; gap: 10px; font-size: 0.9rem; }
         .goal-dot { min-width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 6px; }
 
-        /* Heatmap Section */
-        .heatmap-wrap { background: var(--card); border: 1px solid var(--border); padding: 1.5rem; border-radius: 6px; margin-bottom: 1rem; position: relative; }
-        .heatmap-container { display: flex; gap: 5px; align-items: flex-end; }
-        .days-labels { display: grid; grid-template-rows: repeat(7, 15px); gap: 3px; font-size: 10px; color: var(--muted); padding-top: 20px; }
-        .months-row { display: flex; margin-left: 25px; gap: 35px; margin-bottom: 5px; font-size: 10px; color: var(--muted); }
-        .heatmap { display: grid; grid-template-columns: repeat(53, 15px); grid-template-rows: repeat(7, 15px); gap: 3px; }
-        .cell { width: 15px; height: 15px; border-radius: 2px; background: var(--empty); cursor: pointer; position: relative; border: 1px solid rgba(27,31,35,0.06); }
+        .section-title { font-size: 1.2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        
+        /* Fixed Heatmap Alignment */
+        .heatmap-wrap { 
+            background: var(--card); 
+            border: 1px solid var(--border); 
+            padding: 1.5rem; 
+            border-radius: 6px; 
+            margin-bottom: 1rem;
+            display: inline-block;
+            min-width: 100%;
+        }
+        .heatmap-container { 
+            display: flex; 
+            gap: 10px; 
+        }
+        .months-row { 
+            display: grid;
+            grid-template-columns: repeat(53, 15px);
+            gap: 3px;
+            margin-left: 28px; 
+            margin-bottom: 5px; 
+            font-size: 10px; 
+            color: var(--muted); 
+        }
+        .months-row span {
+            grid-column: span 4; /* Rough approximation for 4 weeks per month */
+        }
+        .days-labels { 
+            display: grid; 
+            grid-template-rows: repeat(7, 15px); 
+            gap: 3px; 
+            font-size: 10px; 
+            color: var(--muted);
+            line-height: 15px;
+        }
+        .heatmap { 
+            display: grid; 
+            grid-auto-flow: column;
+            grid-template-columns: repeat(53, 15px); 
+            grid-template-rows: repeat(7, 15px); 
+            gap: 3px; 
+        }
+        .cell { width: 15px; height: 15px; border-radius: 2px; background: var(--empty); cursor: pointer; position: relative; border: 1px solid rgba(255,255,255,0.03); }
         .cell:hover { border: 1px solid #999; }
         .cell.marco { background: var(--marco-color); }
         .cell.giselle { background: var(--giselle-color); }
         .cell.both { background: var(--both-color); }
+        
         .tooltip { visibility: hidden; width: 140px; background-color: #000; color: #fff; text-align: center; border-radius: 4px; padding: 5px; position: absolute; z-index: 10; bottom: 125%; left: 50%; margin-left: -70px; font-size: 0.7rem; pointer-events: none; border: 1px solid var(--border); }
         .cell:hover .tooltip { visibility: visible; }
 
@@ -68,7 +105,7 @@
     <div class="container">
         <header>
             <h1>⚡ Fetch Climbing Lab</h1>
-            <div style="color: var(--muted); font-size: 0.8rem;">Live Engine v2.0</div>
+            <div style="color: var(--muted); font-size: 0.8rem;">Live Engine v2.1</div>
         </header>
 
         <div class="stats-grid">
@@ -95,12 +132,10 @@
 
         <div class="section-title">📊 Training Timeline</div>
         <div class="heatmap-wrap">
-            <div class="months-row">
-                <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
-            </div>
+            <div class="months-row" id="months-row"></div>
             <div class="heatmap-container">
                 <div class="days-labels">
-                    <span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span>
+                    <span>Sun</span><span></span><span>Tue</span><span></span><span>Thu</span><span></span><span>Sat</span>
                 </div>
                 <div class="heatmap" id="heatmap-team"></div>
             </div>
@@ -141,9 +176,13 @@
                 document.getElementById('stat-sessions').innerText = Object.keys(sessionsByDate).filter(d => d.includes('2026-02')).length;
 
                 const heatmap = document.getElementById('heatmap-team');
+                const monthsRow = document.getElementById('months-row');
                 const startDate = new Date('2026-01-01');
-                // Adjust start to previous Sunday to align rows
+                // Adjust start to previous Sunday
                 startDate.setDate(startDate.getDate() - startDate.getDay());
+
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                let lastMonth = -1;
 
                 for (let i = 0; i < 53 * 7; i++) {
                     const cell = document.createElement('div');
@@ -151,6 +190,20 @@
                     const curr = new Date(startDate);
                     curr.setDate(startDate.getDate() + i);
                     const dateStr = curr.toISOString().split('T')[0];
+                    
+                    // Add Month Labels
+                    if (curr.getDay() === 0) { // New column (Sunday)
+                        if (curr.getMonth() !== lastMonth) {
+                            const monthSpan = document.createElement('span');
+                            monthSpan.innerText = monthNames[curr.getMonth()];
+                            monthsRow.appendChild(monthSpan);
+                            lastMonth = curr.getMonth();
+                        } else {
+                            const emptySpan = document.createElement('span');
+                            monthsRow.appendChild(emptySpan);
+                        }
+                    }
+
                     const session = sessionsByDate[dateStr];
                     if (session) {
                         if (session.climber.includes('Marco') && session.climber.includes('Giselle')) cell.classList.add('both');
