@@ -13,11 +13,24 @@
         .back-link { color: #888; margin-bottom: 2rem; display: block; }
         .card { background: #141414; padding: 1.5rem; border-radius: 8px; border: 1px solid #262626; margin: 1rem 0; }
         .card h3 { margin-top: 0; color: #f5f5f5; }
+        .card.shared { border-color: #22c55e; }
+        .card.personal { border-color: #ef4444; }
+        .card.privacy { border-color: #a855f7; }
         code { background: #262626; padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; color: #e5e5e5; }
         pre { background: #141414; padding: 1rem; border-radius: 8px; overflow-x: auto; border: 1px solid #262626; }
         ul { padding-left: 1.5rem; }
         li { margin-bottom: 0.5rem; }
         .highlight { color: #facc15; font-weight: bold; }
+        .tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.85rem; font-weight: bold; margin-right: 0.3rem; }
+        .tag-shared { background: #166534; color: #86efac; }
+        .tag-personal { background: #7f1d1d; color: #fca5a5; }
+        .tag-gatekeeper { background: #581c87; color: #d8b4fe; }
+        table { width: 100%; text-align: left; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 0.5rem; }
+        thead tr { border-bottom: 1px solid #333; }
+        tbody tr { border-bottom: 1px solid #262626; }
+        .diagram { background: #0d0d0d; border: 1px solid #333; border-radius: 8px; padding: 1.5rem; font-family: monospace; font-size: 0.85rem; white-space: pre; overflow-x: auto; line-height: 1.4; color: #d4d4d4; margin: 1rem 0; }
+        .section-divider { border: none; border-top: 2px solid #a855f7; margin: 3rem 0; }
     </style>
 </head>
 <body>
@@ -26,11 +39,16 @@
         
         <h1>Multi-Agent Strategy: The Fetch Ecosystem</h1>
         <p><strong>Date:</strong> February 20, 2026</p>
-        <p><strong>Status:</strong> Proposal</p>
+        <p><strong>Status:</strong> Proposal — v2 (Shared Context & Privacy)</p>
+
+        <!-- ============================================================ -->
+        <!-- PART I: ORIGINAL ARCHITECTURE                                -->
+        <!-- ============================================================ -->
 
         <h2>1. Executive Summary</h2>
         <p>The current setup relies on a single "Fetch" agent to manage disparate domains: high-stakes trading (i360), physical performance (Climbing Lab), personal habits (The Protocol), and infrastructure (SysAdmin). This monolithic approach creates risks of context pollution, tool misuse, and reduced specialized performance.</p>
         <p>This proposal recommends transitioning to a <strong>Federated Agent Model</strong>, where dedicated agents handle specific domains, routed via context-aware bindings (primarily WhatsApp Groups).</p>
+        <p><strong>v2 Addition:</strong> This revision introduces a <span class="tag tag-gatekeeper">Privacy &amp; Identity Layer</span> to support <strong>secondary users</strong> (starting with Giselle) who need to interact with shared agents while being strictly isolated from personal domains.</p>
 
         <h2>2. Current vs. Proposed Architecture</h2>
         
@@ -45,12 +63,14 @@
         </div>
 
         <div class="card">
-            <h3>Proposed State (Federated)</h3>
+            <h3>Proposed State (Federated + Identity-Aware)</h3>
             <ul>
-                <li><strong>Agent 1: Fetch (Main)</strong> - Habits, Journaling, General Life (The Protocol).</li>
-                <li><strong>Agent 2: i360 (Trader)</strong> - Market analysis, Position management.</li>
-                <li><strong>Agent 3: Climbing Lab</strong> - Vision analysis, Training logs.</li>
-                <li><strong>Agent 4: SysAdmin</strong> - Infrastructure, Cloudflare, Nginx.</li>
+                <li><strong>Agent 1: Fetch (Main)</strong> — Habits, Journaling, General Life (The Protocol). <span class="tag tag-gatekeeper">Gatekeeper</span></li>
+                <li><strong>Agent 2: i360 (Trader)</strong> — Market analysis, Position management. <span class="tag tag-personal">Personal</span></li>
+                <li><strong>Agent 3: Climbing Lab</strong> — Vision analysis, Training logs. <span class="tag tag-shared">Shared</span></li>
+                <li><strong>Agent 4: SysAdmin</strong> — Infrastructure, Cloudflare, Nginx. <span class="tag tag-personal">Personal</span></li>
+                <li><strong>Agent 5: Travel Planner</strong> — Trips, itineraries, bookings. <span class="tag tag-shared">Shared</span></li>
+                <li><strong>Agent 6: Household</strong> — Groceries, chores, shared logistics. <span class="tag tag-shared">Shared</span></li>
             </ul>
         </div>
 
@@ -62,49 +82,421 @@
             <li><strong>Tool Safety:</strong> The <span class="highlight">SysAdmin</span> agent is the <em>only</em> one with <code>exec</code> or <code>ssh</code> access. The General agent cannot accidentally delete files.</li>
             <li><strong>Model Optimization:</strong> 
                 <ul>
-                    <li>Trading: High-reasoning model (e.g., Claude 3.5 Sonnet / Opus).</li>
+                    <li>Trading: High-reasoning model (e.g., Claude Opus).</li>
                     <li>Climbing: Vision-capable model (e.g., GPT-4o).</li>
                     <li>General: Fast, conversational model.</li>
                 </ul>
             </li>
+            <li><strong>Privacy Boundary:</strong> Shared agents never load personal memory files. Personal agents never accept messages from secondary users.</li>
         </ul>
 
         <h2>4. Routing Strategy (The "How")</h2>
-        <p>Since the user is a single individual (one phone number), we cannot route by sender alone. We use <strong>Channel/Group Routing</strong> to direct intent.</p>
+        <p>We use <strong>Channel/Group Routing</strong> combined with <strong>Sender Identity</strong> to direct intent and enforce privacy.</p>
 
-        <table style="width:100%; text-align:left; border-collapse:collapse; margin-top:1rem;">
+        <table>
             <thead>
-                <tr style="border-bottom: 1px solid #333;">
-                    <th style="padding:0.5rem;">Input Channel</th>
-                    <th style="padding:0.5rem;">Routed Agent</th>
-                    <th style="padding:0.5rem;">Purpose</th>
+                <tr>
+                    <th>Input Channel</th>
+                    <th>Routed Agent</th>
+                    <th>Purpose</th>
+                    <th>Access</th>
                 </tr>
             </thead>
             <tbody>
-                <tr style="border-bottom: 1px solid #262626;">
-                    <td style="padding:0.5rem;">WhatsApp DM</td>
-                    <td style="padding:0.5rem;"><strong>Fetch (Main)</strong></td>
-                    <td style="padding:0.5rem;">Quick notes, habits, daily chat.</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #262626;">
-                    <td style="padding:0.5rem;">Group: "Fetch Trading"</td>
-                    <td style="padding:0.5rem;"><strong>i360</strong></td>
-                    <td style="padding:0.5rem;">Deep financial work.</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #262626;">
-                    <td style="padding:0.5rem;">Group: "Climbing Logs"</td>
-                    <td style="padding:0.5rem;"><strong>Climbing Lab</strong></td>
-                    <td style="padding:0.5rem;">Uploading session photos/logs.</td>
+                <tr>
+                    <td>WhatsApp DM (Marco)</td>
+                    <td><strong>Fetch (Main)</strong></td>
+                    <td>Quick notes, habits, daily chat.</td>
+                    <td><span class="tag tag-personal">Full</span></td>
                 </tr>
                 <tr>
-                    <td style="padding:0.5rem;">Group: "SysAdmin"</td>
-                    <td style="padding:0.5rem;"><strong>SysAdmin</strong></td>
-                    <td style="padding:0.5rem;">Server commands & alerts.</td>
+                    <td>WhatsApp DM (Giselle)</td>
+                    <td><strong>Fetch (Main)</strong></td>
+                    <td>General chat, shared queries only.</td>
+                    <td><span class="tag tag-shared">Restricted</span></td>
+                </tr>
+                <tr>
+                    <td>Group: "Fetch Trading"</td>
+                    <td><strong>i360</strong></td>
+                    <td>Deep financial work.</td>
+                    <td><span class="tag tag-personal">Marco Only</span></td>
+                </tr>
+                <tr>
+                    <td>Group: "Climbing Lab"</td>
+                    <td><strong>Climbing Lab</strong></td>
+                    <td>Session photos/logs, beta.</td>
+                    <td><span class="tag tag-shared">Shared</span></td>
+                </tr>
+                <tr>
+                    <td>Group: "Travel"</td>
+                    <td><strong>Travel Planner</strong></td>
+                    <td>Trip planning, bookings.</td>
+                    <td><span class="tag tag-shared">Shared</span></td>
+                </tr>
+                <tr>
+                    <td>Group: "Household"</td>
+                    <td><strong>Household</strong></td>
+                    <td>Groceries, chores, logistics.</td>
+                    <td><span class="tag tag-shared">Shared</span></td>
+                </tr>
+                <tr>
+                    <td>Group: "SysAdmin"</td>
+                    <td><strong>SysAdmin</strong></td>
+                    <td>Server commands &amp; alerts.</td>
+                    <td><span class="tag tag-personal">Marco Only</span></td>
                 </tr>
             </tbody>
         </table>
 
-        <h2>5. Configuration (openclaw.json)</h2>
+        <!-- ============================================================ -->
+        <!-- PART II: SHARED CONTEXT & PRIVACY LAYER (v2)                 -->
+        <!-- ============================================================ -->
+
+        <hr class="section-divider">
+
+        <h2>5. Shared Context & Privacy Layer</h2>
+        <p>This section defines how the agent ecosystem handles <strong>multi-user access</strong> while maintaining strict privacy boundaries. The first secondary user is <strong>Giselle</strong> (Marco's girlfriend), but the architecture is designed to be generalizable.</p>
+
+        <h3>5.1 Design Principles</h3>
+        <ul>
+            <li><strong>Deny by Default:</strong> No agent shares personal information unless the domain is explicitly classified as <span class="tag tag-shared">Shared</span>.</li>
+            <li><strong>Identity at the Edge:</strong> The sender's phone number is resolved to an identity <em>before</em> any agent logic runs. This is not an afterthought — it's the first routing decision.</li>
+            <li><strong>Gatekeeper Pattern:</strong> Fetch (Main) is the only agent that receives DMs from all users. It decides what to answer, what to delegate, and what to refuse.</li>
+            <li><strong>No Cross-Contamination:</strong> Shared agents have their own memory stores. They never read from <code>MEMORY.md</code>, <code>memory/</code>, or any personal workspace file.</li>
+        </ul>
+
+        <h3>5.2 Domain Classification</h3>
+
+        <div class="card shared">
+            <h3>🟢 Shared Domains (Both Users)</h3>
+            <p>Agents in these domains accept messages from Marco AND Giselle. Memory is jointly visible.</p>
+            <ul>
+                <li><strong>Climbing Lab</strong> — Training sessions, beta spray, gym check-ins. Both climb together.</li>
+                <li><strong>Travel Planner</strong> — Trip planning, flight/hotel bookings, itineraries. Trips are shared.</li>
+                <li><strong>Household</strong> — Grocery lists, chores, shared calendar events, apartment logistics.</li>
+            </ul>
+        </div>
+
+        <div class="card personal">
+            <h3>🔴 Personal Domains (Marco Only)</h3>
+            <p>Agents in these domains <strong>reject or ignore</strong> messages from any sender other than Marco. No exceptions.</p>
+            <ul>
+                <li><strong>i360 (Trader)</strong> — All financial data: positions, P&L, strategy, market analysis.</li>
+                <li><strong>Private Finances</strong> — Bank accounts, investments, tax documents.</li>
+                <li><strong>SysAdmin</strong> — Server infrastructure, SSH keys, system configuration.</li>
+                <li><strong>Personal Files</strong> — Journal (<code>MEMORY.md</code>), private notes, work documents.</li>
+                <li><strong>The Protocol</strong> — Personal habits, health metrics, private journaling.</li>
+            </ul>
+        </div>
+
+        <h3>5.3 Identity Resolution</h3>
+        <p>Every incoming message carries a sender identifier (WhatsApp phone number). The system resolves this to a <strong>User Identity</strong> before routing.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Phone Number</th>
+                    <th>Identity</th>
+                    <th>Role</th>
+                    <th>Access Level</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>Marco's number</code></td>
+                    <td>marco</td>
+                    <td>Owner</td>
+                    <td>Full — all agents, all domains</td>
+                </tr>
+                <tr>
+                    <td><code>+13232032364</code></td>
+                    <td>giselle</td>
+                    <td>Partner</td>
+                    <td>Shared domains only</td>
+                </tr>
+                <tr>
+                    <td><em>Any other</em></td>
+                    <td>unknown</td>
+                    <td>—</td>
+                    <td>Denied (or minimal public response)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>5.4 The Gatekeeper: Fetch (Main)</h3>
+        <p>Fetch (Main) is the <strong>central router and privacy enforcer</strong>. When Giselle sends a DM, Fetch (Main) operates in <strong>restricted mode</strong>:</p>
+
+        <div class="card privacy">
+            <h3>🔮 Gatekeeper Behavior Matrix</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Giselle Asks About…</th>
+                        <th>Fetch Responds With…</th>
+                        <th>Rationale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>"What's on the grocery list?"</td>
+                        <td>✅ Full answer (delegates to Household agent)</td>
+                        <td>Shared domain</td>
+                    </tr>
+                    <tr>
+                        <td>"When's our Kalymnos trip?"</td>
+                        <td>✅ Full answer (delegates to Travel Planner)</td>
+                        <td>Shared domain</td>
+                    </tr>
+                    <tr>
+                        <td>"How did Marco's trades do today?"</td>
+                        <td>❌ "I can't share that — ask Marco directly!"</td>
+                        <td>Personal domain (i360)</td>
+                    </tr>
+                    <tr>
+                        <td>"What's in Marco's journal?"</td>
+                        <td>❌ "That's private — I don't have access to that for you."</td>
+                        <td>Personal domain (MEMORY.md)</td>
+                    </tr>
+                    <tr>
+                        <td>"What's our climbing plan this week?"</td>
+                        <td>✅ Full answer (delegates to Climbing Lab)</td>
+                        <td>Shared domain</td>
+                    </tr>
+                    <tr>
+                        <td>"Restart the server"</td>
+                        <td>❌ "I can't do that. Only Marco has SysAdmin access."</td>
+                        <td>Personal domain (SysAdmin)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>5.5 Routing Rules for Giselle's Number</h3>
+        <p>These rules are evaluated in order. The first match wins.</p>
+
+        <div class="card">
+            <h3>Rule Chain</h3>
+            <ol>
+                <li><strong>Personal Group → BLOCK:</strong> If Giselle's number appears in a Personal domain group (i360, SysAdmin), the agent does not respond. The group should not include her, but this is a safety net.</li>
+                <li><strong>Shared Group → ALLOW:</strong> If Giselle messages in a Shared domain group (Climbing Lab, Travel, Household), the agent responds normally with full shared context.</li>
+                <li><strong>DM → Fetch (Main) Restricted Mode:</strong> If Giselle DMs the bot directly, Fetch (Main) activates with a restricted persona:
+                    <ul>
+                        <li>Loads <code>SOUL-shared.md</code> (a persona file without personal details).</li>
+                        <li>Does NOT load <code>MEMORY.md</code> or <code>memory/*.md</code>.</li>
+                        <li>Can delegate to Shared agents only.</li>
+                        <li>Cannot invoke tools: <code>exec</code>, <code>ssh</code>, <code>read</code> (on personal paths), <code>write</code> (on personal paths).</li>
+                    </ul>
+                </li>
+                <li><strong>Unknown Number → IGNORE:</strong> No response to unrecognized senders.</li>
+            </ol>
+        </div>
+
+        <h3>5.6 Architecture Diagram</h3>
+        <div class="diagram">
+┌──────────────────────────────────────────────────────────────────┐
+│                        INCOMING MESSAGE                          │
+│                    (WhatsApp / Discord / etc.)                    │
+└──────────────────────┬───────────────────────────────────────────┘
+                       │
+                       ▼
+            ┌─────────────────────┐
+            │  IDENTITY RESOLVER  │
+            │                     │
+            │  Phone → User Role  │
+            │  Marco  → owner     │
+            │  Giselle→ partner   │
+            │  Other  → unknown   │
+            └────────┬────────────┘
+                     │
+          ┌──────────┴──────────┐
+          │                     │
+     owner/partner          unknown
+          │                     │
+          ▼                     ▼
+┌──────────────────┐    ┌─────────────┐
+│  CHANNEL ROUTER  │    │   IGNORED   │
+│                  │    └─────────────┘
+│  Group → Agent   │
+│  DM → Gatekeeper │
+└────────┬─────────┘
+         │
+    ┌────┴─────────────────────────────┐
+    │                                  │
+    ▼                                  ▼
+┌─────────────────┐         ┌──────────────────────┐
+│   GROUP MATCH   │         │   DM → GATEKEEPER    │
+│                 │         │   (Fetch Main)        │
+│ ┌─────────────┐ │         │                      │
+│ │ Shared grp? │ │         │  if owner:           │
+│ │ → Allow all │ │         │    full access       │
+│ └──────┬──────┘ │         │                      │
+│ ┌──────┴──────┐ │         │  if partner:         │
+│ │Personal grp?│ │         │    restricted mode   │
+│ │→ Owner only │ │         │    → shared agents   │
+│ └─────────────┘ │         │    → no personal mem │
+└─────────────────┘         │    → no personal tools│
+                            └──────────────────────┘
+         │                             │
+         ▼                             ▼
+┌──────────────────────────────────────────────────┐
+│                  AGENT LAYER                      │
+│                                                   │
+│  🟢 SHARED AGENTS        🔴 PERSONAL AGENTS      │
+│  ┌──────────────┐        ┌──────────────┐        │
+│  │ Climbing Lab │        │ i360 Trader  │        │
+│  │ Travel Plan  │        │ SysAdmin     │        │
+│  │ Household    │        │ The Protocol │        │
+│  └──────────────┘        └──────────────┘        │
+│   Memory: shared/         Memory: personal/       │
+│   Tools: domain-scoped    Tools: full             │
+└──────────────────────────────────────────────────┘</div>
+
+        <h3>5.7 Memory Isolation</h3>
+        <p>Memory is the most sensitive surface. The following isolation rules apply:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Memory Store</th>
+                    <th>Location</th>
+                    <th>Marco</th>
+                    <th>Giselle</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Personal Journal</td>
+                    <td><code>~/.openclaw/workspace/MEMORY.md</code></td>
+                    <td>✅ Read/Write</td>
+                    <td>❌ Invisible</td>
+                </tr>
+                <tr>
+                    <td>Daily Notes</td>
+                    <td><code>~/.openclaw/workspace/memory/*.md</code></td>
+                    <td>✅ Read/Write</td>
+                    <td>❌ Invisible</td>
+                </tr>
+                <tr>
+                    <td>Climbing Shared</td>
+                    <td><code>~/.openclaw/workspace-climbing/shared/</code></td>
+                    <td>✅ Read/Write</td>
+                    <td>✅ Read/Write</td>
+                </tr>
+                <tr>
+                    <td>Travel Shared</td>
+                    <td><code>~/.openclaw/workspace-travel/shared/</code></td>
+                    <td>✅ Read/Write</td>
+                    <td>✅ Read/Write</td>
+                </tr>
+                <tr>
+                    <td>Household Shared</td>
+                    <td><code>~/.openclaw/workspace-household/shared/</code></td>
+                    <td>✅ Read/Write</td>
+                    <td>✅ Read/Write</td>
+                </tr>
+                <tr>
+                    <td>i360 Trading</td>
+                    <td><code>~/.openclaw/workspace-i360/</code></td>
+                    <td>✅ Read/Write</td>
+                    <td>❌ Invisible</td>
+                </tr>
+                <tr>
+                    <td>SysAdmin</td>
+                    <td><code>~/.openclaw/workspace-sysadmin/</code></td>
+                    <td>✅ Read/Write</td>
+                    <td>❌ Invisible</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>5.8 Persona Files</h3>
+        <p>Each agent loads a persona (SOUL.md) appropriate to the user and domain:</p>
+
+        <div class="card">
+            <h3>Persona Loading Strategy</h3>
+            <ul>
+                <li><strong><code>SOUL.md</code></strong> — Full persona with personal context. Loaded by Fetch (Main) when Marco messages. Contains preferences, private notes, personality calibration.</li>
+                <li><strong><code>SOUL-shared.md</code></strong> — A stripped-down persona for shared contexts. Loaded when Giselle (or any secondary user) interacts with Fetch (Main) via DM. Friendly, helpful, but contains zero personal information about Marco.</li>
+                <li><strong>Agent-specific SOUL files</strong> — Shared agents (Climbing, Travel, Household) use their own domain-specific SOUL files that contain no personal data by design. Safe for all authorized users.</li>
+            </ul>
+        </div>
+
+        <pre><code class="language-text">
+# SOUL-shared.md (Example)
+
+You are Fetch, a friendly AI assistant for the household.
+
+You help with:
+- Shared planning (travel, climbing, household)
+- General questions and information
+- Coordinating between Marco and Giselle
+
+You DO NOT:
+- Share personal information about any user
+- Access financial data, work files, or private journals
+- Run system commands or access infrastructure
+- Reveal the existence of personal domains to secondary users
+        </code></pre>
+
+        <h2>6. Secondary User Permissions Model</h2>
+        <p>The system supports a role-based access model that can scale beyond the initial two-user setup.</p>
+
+        <h3>6.1 Role Definitions</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Description</th>
+                    <th>Agents</th>
+                    <th>Memory</th>
+                    <th>Tools</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Owner</strong></td>
+                    <td>Full control. Creator of the ecosystem.</td>
+                    <td>All</td>
+                    <td>All</td>
+                    <td>All</td>
+                </tr>
+                <tr>
+                    <td><strong>Partner</strong></td>
+                    <td>Trusted household member. Shared domains only.</td>
+                    <td>Shared + Gatekeeper (restricted)</td>
+                    <td>Shared only</td>
+                    <td>Domain-scoped</td>
+                </tr>
+                <tr>
+                    <td><strong>Guest</strong></td>
+                    <td>Temporary access (e.g., climbing friend). Single domain.</td>
+                    <td>One specific shared agent</td>
+                    <td>None</td>
+                    <td>Minimal</td>
+                </tr>
+                <tr>
+                    <td><strong>Unknown</strong></td>
+                    <td>Unrecognized sender.</td>
+                    <td>None</td>
+                    <td>None</td>
+                    <td>None</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>6.2 Giselle's Specific Configuration</h3>
+        <div class="card shared">
+            <h3>🟢 Giselle — Partner Role</h3>
+            <ul>
+                <li><strong>Identity:</strong> <code>+13232032364</code> → <code>giselle</code></li>
+                <li><strong>DM Behavior:</strong> Fetch (Main) loads <code>SOUL-shared.md</code>, responds to shared queries, deflects personal ones.</li>
+                <li><strong>Group Access:</strong> Climbing Lab ✅ | Travel ✅ | Household ✅ | i360 ❌ | SysAdmin ❌</li>
+                <li><strong>Can ask agents to:</strong> Add items to grocery list, check trip details, log climbing sessions, set shared reminders.</li>
+                <li><strong>Cannot:</strong> Read Marco's journal, check trading P&L, run server commands, access personal files.</li>
+            </ul>
+        </div>
+
+        <h2>7. Configuration (openclaw.json)</h2>
         <pre><code class="language-json">
 {
   "agents": {
@@ -113,52 +505,206 @@
         "id": "main",
         "name": "Fetch",
         "workspace": "~/.openclaw/workspace",
-        "default": true
+        "default": true,
+        "privacy": {
+          "personalPaths": ["MEMORY.md", "memory/", "SOUL.md"],
+          "sharedPersona": "SOUL-shared.md"
+        }
       },
       {
         "id": "i360",
         "name": "i360 Trader",
         "workspace": "~/.openclaw/workspace-i360",
-        "tools": { "deny": ["exec"] } 
+        "tools": { "deny": ["exec"] },
+        "privacy": { "ownerOnly": true }
+      },
+      {
+        "id": "climbing",
+        "name": "Climbing Lab",
+        "workspace": "~/.openclaw/workspace-climbing",
+        "privacy": { "shared": true }
+      },
+      {
+        "id": "travel",
+        "name": "Travel Planner",
+        "workspace": "~/.openclaw/workspace-travel",
+        "privacy": { "shared": true }
+      },
+      {
+        "id": "household",
+        "name": "Household",
+        "workspace": "~/.openclaw/workspace-household",
+        "privacy": { "shared": true }
       },
       {
         "id": "sysadmin",
         "name": "SysAdmin",
         "workspace": "~/.openclaw/workspace-sysadmin",
-        "tools": { "allow": ["exec", "ssh", "read", "write"] }
+        "tools": { "allow": ["exec", "ssh", "read", "write"] },
+        "privacy": { "ownerOnly": true }
       }
     ]
   },
+
+  "users": [
+    {
+      "id": "marco",
+      "role": "owner",
+      "identifiers": [
+        { "channel": "whatsapp", "match": "MARCO_PHONE_NUMBER" }
+      ]
+    },
+    {
+      "id": "giselle",
+      "role": "partner",
+      "identifiers": [
+        { "channel": "whatsapp", "match": "+13232032364" }
+      ],
+      "allowedAgents": ["main", "climbing", "travel", "household"],
+      "restrictedMode": {
+        "agentId": "main",
+        "persona": "SOUL-shared.md",
+        "denyMemory": ["MEMORY.md", "memory/"],
+        "denyTools": ["exec", "ssh"],
+        "denyPaths": ["~/.openclaw/workspace-i360/", "~/.openclaw/workspace-sysadmin/"]
+      }
+    }
+  ],
+
   "bindings": [
-    // Default DM -> Main
+    // Default DM → Main (identity resolver applies restrictions)
     { "agentId": "main", "match": { "channel": "whatsapp" } },
     
-    // Group Routing
+    // Shared Group Routing
+    { 
+      "agentId": "climbing", 
+      "match": { 
+        "channel": "whatsapp", 
+        "peer": { "kind": "group", "id": "CLIMBING_GROUP_ID@g.us" }
+      } 
+    },
+    { 
+      "agentId": "travel", 
+      "match": { 
+        "channel": "whatsapp", 
+        "peer": { "kind": "group", "id": "TRAVEL_GROUP_ID@g.us" }
+      } 
+    },
+    { 
+      "agentId": "household", 
+      "match": { 
+        "channel": "whatsapp", 
+        "peer": { "kind": "group", "id": "HOUSEHOLD_GROUP_ID@g.us" }
+      } 
+    },
+
+    // Personal Group Routing (owner-only enforced by privacy layer)
     { 
       "agentId": "i360", 
       "match": { 
         "channel": "whatsapp", 
-        "peer": { "kind": "group", "id": "1203630...@g.us" } // "Fetch Trading" Group ID
+        "peer": { "kind": "group", "id": "TRADING_GROUP_ID@g.us" }
       } 
     },
     { 
       "agentId": "sysadmin", 
       "match": { 
         "channel": "whatsapp", 
-        "peer": { "kind": "group", "id": "1203631...@g.us" } // "SysAdmin" Group ID
+        "peer": { "kind": "group", "id": "SYSADMIN_GROUP_ID@g.us" }
       } 
     }
   ]
 }
         </code></pre>
 
-        <h2>6. Next Steps</h2>
+        <h2>8. Security Considerations</h2>
+        
+        <div class="card privacy">
+            <h3>🔒 Threat Model</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Threat</th>
+                        <th>Mitigation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Giselle asks personal agent directly</td>
+                        <td>Identity check blocks at binding level. Agent won't activate.</td>
+                    </tr>
+                    <tr>
+                        <td>Prompt injection via shared group</td>
+                        <td>Shared agents have no access to personal memory or tools. Nothing to leak.</td>
+                    </tr>
+                    <tr>
+                        <td>Social engineering via DM ("Marco said to tell me his trades")</td>
+                        <td>Gatekeeper (Fetch Main) never reveals personal data regardless of claimed context.</td>
+                    </tr>
+                    <tr>
+                        <td>Phone number spoofing</td>
+                        <td>WhatsApp E2E encryption makes spoofing impractical. Accepted risk.</td>
+                    </tr>
+                    <tr>
+                        <td>Shared agent leaks personal data from memory</td>
+                        <td>Shared agents use isolated workspaces. No file path overlap with personal stores.</td>
+                    </tr>
+                    <tr>
+                        <td>Agent-to-agent delegation leaks</td>
+                        <td>Fetch (Main) in restricted mode cannot delegate to personal agents. Delegation chain respects caller identity.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>9. Implementation Roadmap</h2>
         <ol>
-            <li><strong>Create Workspaces:</strong> <code>openclaw agents add i360</code>, <code>openclaw agents add sysadmin</code>.</li>
-            <li><strong>Create WhatsApp Groups:</strong> Add the bot to new groups for Trading, Climbing, and SysAdmin.</li>
-            <li><strong>Get Group IDs:</strong> Use <code>openclaw sessions list</code> after messaging in the groups to find their IDs.</li>
-            <li><strong>Update Config:</strong> Apply the bindings in <code>openclaw.json</code>.</li>
+            <li><strong>Phase 1: Identity Layer</strong>
+                <ul>
+                    <li>Add <code>users</code> section to <code>openclaw.json</code>.</li>
+                    <li>Implement sender→identity resolution in the binding engine.</li>
+                    <li>Create <code>SOUL-shared.md</code> persona file.</li>
+                </ul>
+            </li>
+            <li><strong>Phase 2: Shared Agent Workspaces</strong>
+                <ul>
+                    <li>Create workspaces: <code>workspace-climbing</code>, <code>workspace-travel</code>, <code>workspace-household</code>.</li>
+                    <li>Set up shared memory directories with appropriate permissions.</li>
+                    <li>Write domain-specific SOUL files for each agent.</li>
+                </ul>
+            </li>
+            <li><strong>Phase 3: WhatsApp Groups</strong>
+                <ul>
+                    <li>Create shared groups (Climbing Lab, Travel, Household) and add both Marco and Giselle.</li>
+                    <li>Create personal groups (i360, SysAdmin) with Marco only.</li>
+                    <li>Add the bot to all groups and capture Group IDs.</li>
+                </ul>
+            </li>
+            <li><strong>Phase 4: Gatekeeper Logic</strong>
+                <ul>
+                    <li>Implement restricted mode for Fetch (Main) when secondary users DM.</li>
+                    <li>Test delegation chain: Giselle DM → Fetch → Shared Agent (should work).</li>
+                    <li>Test block chain: Giselle DM → Fetch → Personal Agent (should fail gracefully).</li>
+                </ul>
+            </li>
+            <li><strong>Phase 5: Validation & Hardening</strong>
+                <ul>
+                    <li>Red-team the setup: try to extract personal data through shared agents.</li>
+                    <li>Verify memory isolation: shared agents cannot read personal paths.</li>
+                    <li>User acceptance testing with Giselle.</li>
+                </ul>
+            </li>
         </ol>
+
+        <h2>10. Open Questions</h2>
+        <ul>
+            <li><strong>Shared Calendar:</strong> Should there be a unified shared calendar, or do Climbing/Travel/Household each manage their own events?</li>
+            <li><strong>Notification Routing:</strong> If a shared agent needs to notify both users (e.g., trip departure reminder), should it message the group or DM each person?</li>
+            <li><strong>Giselle's Direct Agent:</strong> Should Giselle eventually get her own "main" agent with her own <code>SOUL.md</code> and personal memory, or is the shared model sufficient?</li>
+            <li><strong>OpenClaw Support:</strong> The <code>users</code> config and <code>restrictedMode</code> are proposed schema extensions. These would need to be implemented in the OpenClaw binding engine.</li>
+        </ul>
+
+        <p style="color: #666; margin-top: 3rem; font-size: 0.9rem;">Last updated: February 20, 2026 — v2 (Shared Context & Privacy Layer)</p>
     </div>
 </body>
 </html>
