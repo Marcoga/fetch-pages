@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch OS | Operational Dashboard</title>
+    <style>
+        :root {
+            --bg: #0a0a0a; --card: #141414; --accent: #38bdf8; --text: #f5f5f5;
+            --muted: #a3a3a3; --border: #262626; --warning: #fbbf24;
+        }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 2rem; line-height: 1.6; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        header { border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 3rem; }
+        h1 { color: var(--accent); margin: 0; font-size: 2rem; letter-spacing: -0.5px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+        section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+        h2 { font-size: 1.1rem; text-transform: uppercase; color: var(--muted); margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        .link-list { list-style: none; padding: 0; }
+        .link-list li { margin-bottom: 0.8rem; }
+        .link-list a { color: var(--text); text-decoration: none; display: flex; justify-content: space-between; align-items: center; background: #1c1c1c; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid transparent; transition: 0.2s; }
+        .link-list a:hover { border-color: var(--accent); background: #262626; }
+        .date { font-size: 0.8rem; color: var(--muted); }
+        .config-box { background: #000; padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.9rem; color: #00ff99; overflow-x: auto; }
+        .protocol-item { margin-bottom: 1rem; padding-left: 1rem; border-left: 3px solid var(--accent); }
+        .tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: var(--border); color: var(--text); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Fetch OS</h1>
+            <p style="color: var(--muted)">Central Operating System for Marco & Fetch</p>
+        </header>
+
+        <div class="grid">
+            <!-- INCIDENT REPORTS & ANALYSIS -->
+            <section>
+                <h2>Recent Reports</h2>
+                <ul class="link-list">
+                    <li>
+                        <a href="reports/incident-2026-02-19.html">
+                            <span>Search Hang Incident</span>
+                            <span class="date">Feb 19, 2026</span>
+                        </a>
+                    </li>
+                </ul>
+                <a href="reports/index.html" style="color: var(--accent); text-decoration: none; font-size: 0.9rem;">View All Reports →</a>
+            </section>
+
+            <!-- WORKFLOWS & CONVENTIONS -->
+            <section>
+                <h2>Operating Protocols</h2>
+                <div class="protocol-item">
+                    <strong>Climbing Analysis</strong><br>
+                    <span style="font-size: 0.85rem; color: var(--muted)">Gemini Flash by default. Opus for "Deep Dives" on request.</span>
+                </div>
+                <div class="protocol-item">
+                    <strong>Config Changes</strong><br>
+                    <span style="font-size: 0.85rem; color: var(--muted)">Document reason before applying. Use `trustedProxies` for tunnel access.</span>
+                </div>
+                <div class="protocol-item">
+                    <strong>Stability</strong><br>
+                    <span style="font-size: 0.85rem; color: var(--muted)">60s timeouts enforced on all media/web tools.</span>
+                </div>
+            </section>
+
+            <!-- LIVE CONFIGURATION REFERENCE -->
+            <section style="grid-column: span 2;">
+                <h2>Current Channel Config (WhatsApp)</h2>
+                <div class="config-box">
+"whatsapp": {<br>
+&nbsp;&nbsp;"dmPolicy": "allowlist",<br>
+&nbsp;&nbsp;"groupPolicy": "allowlist",<br>
+&nbsp;&nbsp;"groups": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"120363424792250159@g.us": {} // Climbing Lab<br>
+&nbsp;&nbsp;}<br>
+}
+                </div>
+                <p style="font-size: 0.8rem; color: var(--muted); margin-top: 1rem;">
+                    *Note: This is a reference. Full changes must be audited via the Change Log.
+                </p>
+            </section>
+        </div>
+    </div>
+</body>
+</html>
