@@ -111,7 +111,7 @@
     <div class="container">
         <header>
             <h1>⚡ Fetch Climbing Lab</h1>
-            <div style="color: var(--muted); font-size: 0.8rem;">Live Engine v2.4</div>
+            <div style="color: var(--muted); font-size: 0.8rem;">Live Engine v2.5</div>
         </header>
 
         <div class="stats-grid">
@@ -183,7 +183,7 @@
 
         function formatDate(isoString) {
             const [y, m, d] = isoString.split('-');
-            return `\${d}.\${m}.\${y}`;
+            return `${d}.${m}.${y}`;
         }
 
         function showSession(dateStr) {
@@ -191,7 +191,7 @@
             document.getElementById('view-date').innerText = formatDate(dateStr);
             
             document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
-            const activeCell = document.querySelector(`.cell[data-date="\${dateStr}"]`);
+            const activeCell = document.querySelector(`.cell[data-date="${dateStr}"]`);
             if (activeCell) activeCell.classList.add('selected');
 
             const marcoCont = document.getElementById('view-marco-links');
@@ -211,7 +211,7 @@
             const giselleAnalyses = session.analyses.filter(a => a.url.includes('giselle'));
 
             const buildLinks = (list) => list.length > 0 
-                ? list.map(a => `<a href="${window.location.origin}/\${a.url}" class="btn-link \${a.model}">\${a.model.toUpperCase()} Review</a>`).join('')
+                ? list.map(a => `<a href="${window.location.origin}/${a.url}" class="btn-link ${a.model}">${a.model.toUpperCase()} Review</a>`).join('')
                 : '<a href="#" class="btn-link">Write Notes</a>';
 
             marcoCont.innerHTML = buildLinks(marcoAnalyses);
@@ -273,7 +273,7 @@
 
                     const tt = document.createElement('span');
                     tt.className = 'tooltip';
-                    tt.innerText = session ? `\${formatDate(dateStr)}: \${session.climber}` : formatDate(dateStr);
+                    tt.innerText = session ? `${formatDate(dateStr)}: ${session.climber}` : formatDate(dateStr);
                     cell.appendChild(tt);
                     heatmap.appendChild(cell);
                 }
