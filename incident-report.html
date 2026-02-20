@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incident Review: Search Hang (Feb 19)</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; }
+        h1 { color: #d32f2f; border-bottom: 2px solid #d32f2f; padding-bottom: 10px; }
+        h2 { color: #1976d2; margin-top: 30px; }
+        .timestamp { font-family: monospace; color: #555; background: #f5f5f5; padding: 2px 5px; border-radius: 3px; }
+        .log-entry { background: #f9f9f9; border-left: 4px solid #ccc; padding: 10px; font-family: monospace; font-size: 0.9em; overflow-x: auto; white-space: pre-wrap; margin: 10px 0; }
+        .recommendation { background: #e3f2fd; border-left: 4px solid #1976d2; padding: 15px; margin: 15px 0; }
+        code { background: #f5f5f5; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        .highlight { font-weight: bold; color: #d32f2f; }
+    </style>
+</head>
+<body>
+
+<h1>Incident Review: Search Hang</h1>
+<p><strong>Date:</strong> February 19, 2026<br>
+<strong>Time:</strong> 19:43 - 19:53 UTC<br>
+<strong>Impact:</strong> Agent unresponsive for ~5 minutes; manual restart required (SIGTERM).</p>
+
+<h2>Executive Summary</h2>
+<p>The agent became unresponsive after receiving an image message at 19:43 UTC. Analysis indicates the <code class="highlight">media</code> tool (specifically image understanding via Gemini CLI) hung indefinitely. Due to the serialized nature of the agent loop, subsequent messages were blocked. The hang persisted until the user manually terminated the process at 19:48 UTC. A second hang occurred shortly after restart (19:53 UTC) likely due to retrying the same operation or similar conditions.</p>
+
+<h2>Timeline</h2>
+<ul>
+    <li><span class="timestamp">19:43:33 UTC</span> - <strong>Inbound Image:</strong> User sent a JPEG image (108 chars metadata).</li>
+    <li><span class="timestamp">19:43:58 UTC</span> - <strong>Inbound Text:</strong> User sent a follow-up text message (101 chars).</li>
+    <li><span class="timestamp">19:44:xx UTC</span> - <strong>Processing Started:</strong> Agent began processing (typing indicator activated).</li>
+    <li><span class="timestamp">19:46:29 UTC</span> - <strong>Typing Timeout:</strong> Typing indicator TTL reached (2 minutes), confirming the agent was stuck in a long-running operation.</li>
+    <li><span class="timestamp">19:48:41 UTC</span> - <strong>User Follow-up:</strong> User sent another message, likely due to lack of response.</li>
+    <li><span class="timestamp">19:48:57 UTC</span> - <strong>SIGTERM:</strong> User manually killed the process to restore service.</li>
+    <li><span class="timestamp">19:51:31 UTC</span> - <strong>Recurrence:</strong> Agent hung again after restart, leading to another SIGTERM at 19:53:26 UTC.</li>
+</ul>
+
+<h2>Root Cause Analysis</h2>
+<h3>1. Tool Hang</h3>
+<p>The primary cause was a hang in the <code>image</code> processing tool. The configuration relies on auto-detected defaults for media understanding (Gemini CLI), which lacks an explicit timeout in the user's <code>openclaw.json</code>. The default behavior allowed the tool to hang indefinitely (or beyond the 2-minute typing timeout).</p>
+
+<h3>2. Concurrency Blocking</h3>
+<p>OpenClaw's agent loop serializes runs per session to maintain consistency. When the image processing hung, the subsequent text messages were queued behind it, causing the perceived "Search Hang" where the agent ignored new inputs.</p>
+
+<h3>3. Missing Configuration</h3>
+<p>Review of <code>openclaw.json</code> reveals:</p>
+<ul>
+    <li>Missing <code>tools.media</code> configuration (relying on defaults).</li>
+    <li>Missing <code>tools.web.search</code> configuration (Brave API key not found in env). If the user intended to search based on the image, the agent might have attempted a fallback (like Gemini grounding) which also hung, or the hang was purely in the image analysis phase.</li>
+</ul>
+
+<h2>Recommendations</h2>
+
+<div class="recommendation">
+    <h3>1. Configure Explicit Timeouts</h3>
+    <p>Add a <code>tools.media</code> block to <code>openclaw.json</code> to enforce a strict timeout on media operations. This prevents a single tool from hanging the entire agent.</p>
+    <pre><code>"tools": {
+  "media": {
+    "image": {
+      "timeoutSeconds": 60
+    }
+  }
+}</code></pre>
+</div>
+
+<div class="recommendation">
+    <h3>2. Enable Web Search (Optional)</h3>
+    <p>If web search capability is desired, configure the Brave Search API key. This ensures the <code>web_search</code> tool functions correctly and fails fast if the API is unreachable, rather than hanging.</p>
+    <pre><code>"tools": {
+  "web": {
+    "search": {
+      "enabled": true,
+      "apiKey": "YOUR_BRAVE_API_KEY",
+      "timeoutSeconds": 30
+    }
+  }
+}</code></pre>
+</div>
+
+<div class="recommendation">
+    <h3>3. Review CLI Stability</h3>
+    <p>The hang likely occurred in the <code>google-gemini-cli</code> execution. Ensure the CLI is up-to-date and stable. Consider switching to a direct API provider (e.g., OpenAI or Anthropic) for media understanding if the CLI remains unstable.</p>
+</div>
+
+</body>
+</html>
