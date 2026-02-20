@@ -87,10 +87,12 @@
                 const sessionsByDate = {};
                 data.forEach(row => {
                     if (!sessionsByDate[row.date]) {
-                        sessionsByDate[row.date] = { analyses: [], notes: row.notes || '', climber: row.climber };
+                        sessionsByDate[row.date] = { analyses: [], notes: row.user_notes || '', climber: row.climber };
                     }
-                    if (row.url && !row.url.includes('giselle')) {
-                        sessionsByDate[row.date].analyses.push({ model: row.model, url: '../' + row.url });
+                    if (row.climber.includes(USER_NAME)) {
+                        if (row.url && !row.url.includes('giselle')) {
+                            sessionsByDate[row.date].analyses.push({ model: row.model, url: '../' + row.url });
+                        }
                     }
                 });
 
