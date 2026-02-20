@@ -6,7 +6,7 @@
     <title>Giselle's Climbing Journal | Fetch Lab</title>
     <style>
         :root { 
-            --bg: #0d1117; --card: #161b22; --accent: #fbbf24; --text: #f5f5f5; 
+            --bg: #0d1117; --card: #161b22; --accent: #f472b6; --text: #f5f5f5; 
             --muted: #8b949e; --border: #30363d; 
         }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 2rem; }
@@ -14,10 +14,15 @@
         header { margin-bottom: 3rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
         h1 { color: var(--accent); margin: 0; }
         .session { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
-        .date { font-weight: bold; color: var(--accent); display: block; margin-bottom: 10px; }
-        .links { display: flex; gap: 10px; margin-top: 15px; }
-        .btn { text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; background: var(--border); color: var(--text); }
-        .btn:hover { background: #444; }
+        .date { font-weight: bold; color: var(--accent); display: block; margin-bottom: 10px; font-size: 1.1rem; }
+        .links { display: flex; gap: 10px; margin-top: 15px; margin-bottom: 15px; }
+        .btn { text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; background: var(--border); color: var(--text); border: 1px solid transparent; }
+        .btn:hover { border-color: var(--accent); }
+        
+        .highlights { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px; }
+        .highlight-item { background: #000; aspect-ratio: 9/16; border-radius: 4px; overflow: hidden; position: relative; border: 1px solid var(--border); }
+        .highlight-item img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .highlight-label { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); padding: 4px; font-size: 0.65rem; text-align: center; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -29,6 +34,20 @@
         <div id="journal-content">Loading...</div>
     </div>
     <script>
+        const manualHighlights = {
+            '2026-02-19': [
+                { label: '6b Send', img: '../assets/climb-gifs/climb_1.gif', type: 'marco' },
+                { label: 'Yellow Send', img: '../assets/giselle-gifs/g5_victory.gif', type: 'giselle' },
+                { label: 'Vol Mastery', img: '../assets/climb-gifs/climb_4.gif', type: 'marco' },
+                { label: 'High Step', img: '../assets/giselle-gifs/g3_highstep.gif', type: 'giselle' }
+            ]
+        };
+
+        function formatDate(isoString) {
+            const [y, m, d] = isoString.split('-');
+            return `${d}.${m}.${y}`;
+        }
+
         async function load() {
             const res = await fetch('https://api.marcoga.com/api/sessions');
             const data = await res.json();
@@ -37,7 +56,7 @@
             
             const sessionsByDate = {};
             data.forEach(row => {
-                if (row.climber.includes('Marco')) {
+                if (row.climber.includes('Giselle')) {
                     if (!sessionsByDate[row.date]) sessionsByDate[row.date] = [];
                     if (row.url && row.url.includes('giselle')) {
                         sessionsByDate[row.date].push({ model: row.model, url: '../' + row.url });
@@ -47,15 +66,27 @@
 
             Object.keys(sessionsByDate).sort().reverse().forEach(date => {
                 const analyses = sessionsByDate[date];
+                const highlights = (manualHighlights[date] || []).filter(h => h.type === 'giselle');
+                
                 container.innerHTML += `
                     <div class="session">
-                        <span class="date">${date}</span>
+                        <span class="date">${formatDate(date)}</span>
                         <div class="links">
                             ${analyses.length > 0 ? 
                                 analyses.map(a => `<a href="${a.url}" class="btn">${a.model.toUpperCase()} Review</a>`).join('') :
                                 '<span>No digital analysis.</span>'
                             }
                         </div>
+                        ${highlights.length > 0 ? `
+                            <div class="highlights">
+                                ${highlights.map(h => `
+                                    <div class="highlight-item">
+                                        <img src="${h.img}">
+                                        <div class="highlight-label">${h.label}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             });
