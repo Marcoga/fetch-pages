@@ -19,6 +19,13 @@
         .btn { text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; background: var(--border); color: var(--text); border: 1px solid transparent; }
         .btn:hover { border-color: var(--accent); }
         
+        /* Notes Section */
+        .notes-section { margin-top: 15px; }
+        .notes-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .notes-area { width: 100%; min-height: 80px; background: #0d1117; border: 1px solid var(--border); border-radius: 4px; color: #fff; padding: 10px; font-size: 0.9rem; resize: vertical; box-sizing: border-box; }
+        .save-notes-btn { margin-top: 8px; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer; }
+        .save-notes-btn:hover { color: var(--accent); border-color: var(--accent); }
+
         /* Highlights in Journal */
         .highlights { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px; }
         .highlight-item { background: #000; aspect-ratio: 9/16; border-radius: 4px; overflow: hidden; position: relative; border: 1px solid var(--border); }
@@ -49,6 +56,28 @@
             return `${d}.${m}.${y}`;
         }
 
+        async function saveNotes(date, btn) {
+            const textarea = document.getElementById(`notes-${date}`);
+            const notes = textarea.value;
+            btn.innerText = 'Saving...';
+            try {
+                const res = await fetch('https://api.marcoga.com/api/sessions/notes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date, notes })
+                });
+                if (res.ok) {
+                    btn.innerText = 'Saved!';
+                    setTimeout(() => btn.innerText = 'Save Notes', 2000);
+                } else {
+                    btn.innerText = 'Error saving';
+                }
+            } catch (e) {
+                console.error(e);
+                btn.innerText = 'Failed to sync';
+            }
+        }
+
         async function load() {
             const res = await fetch('https://api.marcoga.com/api/sessions');
             const data = await res.json();
@@ -57,16 +86,21 @@
             
             const sessionsByDate = {};
             data.forEach(row => {
+                if (!sessionsByDate[row.date]) {
+                    sessionsByDate[row.date] = { analyses: [], notes: row.notes || '', climber: row.climber };
+                }
                 if (row.climber.includes('Marco')) {
-                    if (!sessionsByDate[row.date]) sessionsByDate[row.date] = [];
                     if (row.url && !row.url.includes('giselle')) {
-                        sessionsByDate[row.date].push({ model: row.model, url: '../' + row.url });
+                        sessionsByDate[row.date].analyses.push({ model: row.model, url: '../' + row.url });
                     }
                 }
             });
 
             Object.keys(sessionsByDate).sort().reverse().forEach(date => {
-                const analyses = sessionsByDate[date];
+                const session = sessionsByDate[date];
+                if (!session.climber.includes('Marco')) return;
+
+                const analyses = session.analyses;
                 const highlights = (manualHighlights[date] || []).filter(h => h.type === 'marco');
                 
                 container.innerHTML += `
@@ -77,6 +111,11 @@
                                 analyses.map(a => `<a href="${a.url}" class="btn">${a.model.toUpperCase()} Review</a>`).join('') :
                                 '<span>No digital analysis.</span>'
                             }
+                        </div>
+                        <div class="notes-section">
+                            <span class="notes-label">Session Notes</span>
+                            <textarea id="notes-${date}" class="notes-area" placeholder="Add beta, how you felt, or specific sends...">${session.notes}</textarea>
+                            <button class="save-notes-btn" onclick="saveNotes('${date}', this)">Save Notes</button>
                         </div>
                         ${highlights.length > 0 ? `
                             <div class="highlights">
