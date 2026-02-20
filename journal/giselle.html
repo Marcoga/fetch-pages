@@ -78,7 +78,8 @@
 
         async function load() {
             try {
-                const res = await fetch(`https://api.marcoga.com/api/sessions?user=${USER_NAME}`);
+                const ts = Date.now();
+                const res = await fetch(`https://api.marcoga.com/api/sessions?user=${USER_NAME}&cache=${ts}`);
                 const data = await res.json();
                 const container = document.getElementById('journal-content');
                 container.innerHTML = '';
@@ -86,7 +87,11 @@
                 const sessionsByDate = {};
                 data.forEach(row => {
                     if (!sessionsByDate[row.date]) {
-                        sessionsByDate[row.date] = { analyses: [], notes: row.user_notes || '', climber: row.climber };
+                        sessionsByDate[row.date] = { 
+                            analyses: [], 
+                            notes: row.user_notes === null ? '' : row.user_notes, 
+                            climber: row.climber 
+                        };
                     }
                     if (row.climber.includes(USER_NAME)) {
                         if (row.url && row.url.includes('giselle')) {
