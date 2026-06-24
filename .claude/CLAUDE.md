@@ -1,7 +1,9 @@
 # fetch-pages
 
-This is Marco's static file hosting repo, served via **GitHub Pages** at:
-**https://marcoga.github.io/fetch-pages/**
+This is Marco's static file hosting repo, served via Cloudflare at the custom domain:
+**https://lab.marcoga.com/**
+
+IMPORTANT: Always use `lab.marcoga.com` for public URLs — never `marcoga.github.io/fetch-pages/`.
 
 ## Publishing static files
 
@@ -15,8 +17,8 @@ git commit -m "Add <description>"
 git push
 ```
 
-GitHub Pages auto-publishes within ~1 minute. The public URL is:
-`https://marcoga.github.io/fetch-pages/<filename>`
+Cloudflare picks up the new file within ~1 minute. The public URL is:
+`https://lab.marcoga.com/<filename>`
 
 ## What goes here
 
@@ -25,4 +27,4 @@ GitHub Pages auto-publishes within ~1 minute. The public URL is:
 - Videos and other media for linking in Notion tasks
 - Any asset that needs a public URL
 
-## After pushing, always put the link in the Notion task.
+## After pushing, always put the lab.marcoga.com link in the Notion task.
